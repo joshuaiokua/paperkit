@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="150" viewBox="0 0 660 150">
+  <!-- Hand-authored sample figure. Text is REAL text in DejaVu Sans — the same
+       family matplotlib SVGs name — so check_render.py's sentinel + embedded-font
+       assertions exercise the exact failure mode they guard in production. -->
+  <rect x="0" y="0" width="660" height="150" fill="#fffffb"/>
+  <text x="330" y="28" text-anchor="middle" font-family="DejaVu Sans" font-size="15" font-weight="bold" fill="#1f1f1b">PAPERKIT SAMPLE PIPELINE</text>
+  <g font-family="DejaVu Sans" font-size="13" fill="#1f1f1b">
+    <rect x="20"  y="60" width="120" height="44" fill="#eef0ea" stroke="#585b54" stroke-width="1"/>
+    <text x="80"  y="87" text-anchor="middle">report.md</text>
+    <rect x="190" y="60" width="120" height="44" fill="#eef0ea" stroke="#585b54" stroke-width="1"/>
+    <text x="250" y="87" text-anchor="middle">pandoc 3.10</text>
+    <rect x="360" y="60" width="120" height="44" fill="#eef0ea" stroke="#585b54" stroke-width="1"/>
+    <text x="420" y="87" text-anchor="middle">typst 0.14.2</text>
+    <rect x="530" y="60" width="110" height="44" fill="#eef0ea" stroke="#585b54" stroke-width="1"/>
+    <text x="585" y="87" text-anchor="middle">PDF/UA-1</text>
+  </g>
+  <g stroke="#585b54" stroke-width="1.2" fill="#585b54">
+    <line x1="140" y1="82" x2="182" y2="82"/><path d="M182 78 l8 4 -8 4 z"/>
+    <line x1="310" y1="82" x2="352" y2="82"/><path d="M352 78 l8 4 -8 4 z"/>
+    <line x1="480" y1="82" x2="522" y2="82"/><path d="M522 78 l8 4 -8 4 z"/>
+  </g>
+  <text x="330" y="134" text-anchor="middle" font-family="DejaVu Sans" font-size="11" fill="#585b54">house.typ + brand.typ + refs.lua + vendored fonts</text>
+</svg>

@@ -1,0 +1,46 @@
+name: ci
+
+# Self-test: render the sample document through render.sh and gate it with
+# check_render.py. The sample exercises every mechanism the kit promises —
+# title promotion, [N] citation links, figure SVG text, font embedding,
+# PDF/UA-1 — so a regression fails here before any consumer repo can see it.
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # EXACT typst pin — 0.15.0 postdates pandoc 3.10 (breaking changes); bump only
+      # when a pandoc release states typst-0.15 compatibility, together with
+      # bootstrap.sh and templates/*.yml.
+      - uses: typst-community/setup-typst@v5
+        with:
+          typst-version: "0.14.2"
+      - name: Install pandoc 3.10 (pinned)
+        run: |
+          curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.10/pandoc-3.10-1-amd64.deb
+          echo "d502599878eb29af3ae5f0cb5d559134df96534125d452c7a0674a5bad2c5ecf  /tmp/pandoc.deb" | sha256sum -c -
+          sudo dpkg -i /tmp/pandoc.deb
+      - name: Verify font manifest
+        run: cd fonts && shasum -a 256 -c MANIFEST.sha256
+      - name: Render sample
+        run: TYPST=typst ./render.sh sample/sample.md
+      - name: Check render
+        run: |
+          pip install --quiet 'pypdf>=5,<7'
+          python3 check_render.py sample/sample.pdf \
+            --min-pages 2 \
+            --min-links 6 \
+            --sentinel "paperkit sample document" \
+            --sentinel "PAPERKIT SAMPLE PIPELINE" \
+            --sentinel "THE PIPELINE UNDER TEST" \
+            --require-font Geist --require-font Literata --require-font DejaVuSans
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sample-pdf
+          path: sample/sample.pdf
+          if-no-files-found: error

@@ -1,0 +1,52 @@
+name: release
+
+# On a v* tag: re-run the self-test, then package the tag as a tarball release
+# asset — the artifact of record that consumers pin by sha256. This repo has
+# release immutability enabled, so the asset is attached while the release is
+# drafted (assets cannot be added after publish) and the published release/tag
+# are permanently locked. The tarball is never regenerated: `git archive`
+# output is not stable across git versions — fixes ship as a new tag.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: typst-community/setup-typst@v5
+        with:
+          typst-version: "0.14.2"
+      - name: Install pandoc 3.10 (pinned)
+        run: |
+          curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.10/pandoc-3.10-1-amd64.deb
+          echo "d502599878eb29af3ae5f0cb5d559134df96534125d452c7a0674a5bad2c5ecf  /tmp/pandoc.deb" | sha256sum -c -
+          sudo dpkg -i /tmp/pandoc.deb
+      - name: Verify font manifest
+        run: cd fonts && shasum -a 256 -c MANIFEST.sha256
+      - name: Render sample (self-test)
+        run: |
+          TYPST=typst ./render.sh sample/sample.md
+          pip install --quiet 'pypdf>=5,<7'
+          python3 check_render.py sample/sample.pdf \
+            --min-pages 2 --min-links 6 \
+            --sentinel "paperkit sample document" \
+            --sentinel "PAPERKIT SAMPLE PIPELINE" \
+            --sentinel "THE PIPELINE UNDER TEST" \
+            --require-font Geist --require-font Literata --require-font DejaVuSans
+      - name: Package + release (draft -> upload -> publish)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          git archive --format=tar.gz --prefix=paperkit/ -o "paperkit-${TAG}.tar.gz" "$TAG"
+          gh release create "$TAG" --draft --verify-tag --title "$TAG" --generate-notes
+          gh release upload "$TAG" "paperkit-${TAG}.tar.gz"
+          gh release edit "$TAG" --draft=false
+          echo "Pin this in consumers as PAPERKIT_SHA256 (GitHub's computed asset digest):"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" \
+            --jq '.assets[] | "\(.name)  \(.digest)"'

@@ -1,0 +1,58 @@
+name: release
+
+# On a milestone-* tag: render the milestone PDFs and attach them to the GitHub
+# release (created if absent). PDFs are never committed — the release asset is
+# their durable home. Installed from paperkit (templates/release.yml); the
+# toolchain steps deliberately mirror render.yml so each workflow stays
+# self-contained. NOTE: do NOT enable GitHub release immutability on repos
+# using this workflow — the milestone release-refresh flow (delete release,
+# re-tag, re-release) depends on tag reuse.
+
+on:
+  push:
+    tags: ["milestone-*"]
+
+permissions:
+  contents: write
+
+env:
+  PAPERKIT_REF: v0.1.0
+  PAPERKIT_SHA256: "0000000000000000000000000000000000000000000000000000000000000000"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: typst-community/setup-typst@v5
+        with:
+          typst-version: "0.14.2"
+      - name: Install pandoc 3.10 (pinned)
+        run: |
+          curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.10/pandoc-3.10-1-amd64.deb
+          echo "d502599878eb29af3ae5f0cb5d559134df96534125d452c7a0674a5bad2c5ecf  /tmp/pandoc.deb" | sha256sum -c -
+          sudo dpkg -i /tmp/pandoc.deb
+      - name: Fetch paperkit (pinned release asset)
+        run: |
+          curl -fsSL -o /tmp/paperkit.tar.gz \
+            "https://github.com/joshuaiokua/paperkit/releases/download/${PAPERKIT_REF}/paperkit-${PAPERKIT_REF}.tar.gz"
+          echo "${PAPERKIT_SHA256}  /tmp/paperkit.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/paperkit.tar.gz -C /tmp    # -> /tmp/paperkit/
+      - name: Render milestone reports
+        run: |
+          pip install --quiet 'pypdf>=5,<7'
+          mkdir -p pdf-out
+          shopt -s nullglob
+          for md in reports/*milestone*.md; do
+            out="pdf-out/$(basename "${md%.md}").pdf"
+            TYPST=typst /tmp/paperkit/render.sh "$md" "$out"
+            python3 /tmp/paperkit/check_render.py "$out" --min-pages 2
+          done
+      - name: Create release + upload PDFs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --verify-tag --title "$TAG" --generate-notes
+          gh release upload "$TAG" pdf-out/*.pdf --clobber
