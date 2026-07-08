@@ -25,7 +25,12 @@
 #let rule-light    = rgb("#d6d8d0")  // H2 hairline, running-header rule
 #let rule-strong   = rgb("#bcc0b5")  // H1 rule
 
-#let font-heading   = "Literata"    // vendored statics: SemiBold + SemiBold Italic
-#let font-body      = "Geist"       // vendored statics: Regular/Italic/Bold/BoldItalic
-#let font-mono      = "Geist Mono"  // vendored statics: Regular/SemiBold/Bold
+// Each face is a FALLBACK CHAIN ending in DejaVu (vendored): Geist/Literata are
+// Latin-focused, so glyphs they lack (Δ, ≈, math minus …) would otherwise fall
+// back to typst's embedded Libertinus SERIF — a silent brand break the pilot
+// caught (check_render's embedded-font list showed LibertinusSerif). DejaVu's
+// huge coverage keeps stray glyphs sans and matches the figure font.
+#let font-heading   = ("Literata", "DejaVu Sans")        // SemiBold + Italic statics
+#let font-body      = ("Geist", "DejaVu Sans")           // Regular/Italic/Bold/BoldItalic
+#let font-mono      = ("Geist Mono", "DejaVu Sans Mono") // Regular/SemiBold/Bold; DVSM is typst-embedded
 #let weight-heading = 600

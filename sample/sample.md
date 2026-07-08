@@ -20,6 +20,8 @@ loudly before any consumer repo ever sees the breakage [1].
   the same family matplotlib figures use in production documents.
 - **Typography** — body is Geist (*italic*, **bold**, and ***bold italic*** exercise
   the vendored cuts), headings are Literata SemiBold, and code is Geist Mono.
+  Glyphs outside those faces' coverage (Δ, effect sizes like −0.084) fall back to
+  vendored DejaVu Sans — never to a serif.
 
 ## The pipeline under test
 
