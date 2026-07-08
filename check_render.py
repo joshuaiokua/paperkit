@@ -21,7 +21,6 @@ Dependency: pypdf (`pip install 'pypdf>=5,<7'` or `uv run --with pypdf ...`).
 """
 import argparse
 import re
-import sys
 
 from pypdf import PdfReader
 
