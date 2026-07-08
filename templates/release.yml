@@ -16,8 +16,8 @@ permissions:
   contents: write
 
 env:
-  PAPERKIT_REF: v0.1.0
-  PAPERKIT_SHA256: "950b15bbd0016449b96e6d3b1fde8ac8bb1c24ef528fc313cc789b70c1601837"
+  PAPERKIT_REF: v0.1.1
+  PAPERKIT_SHA256: "57a84b4c09edb3ec4e402c4afca0952096619cf6b79b7f118619e00948093e4a"
 
 jobs:
   release:
