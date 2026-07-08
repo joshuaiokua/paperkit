@@ -26,18 +26,11 @@ jobs:
           curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.10/pandoc-3.10-1-amd64.deb
           echo "d502599878eb29af3ae5f0cb5d559134df96534125d452c7a0674a5bad2c5ecf  /tmp/pandoc.deb" | sha256sum -c -
           sudo dpkg -i /tmp/pandoc.deb
-      - name: Verify font manifest
-        run: cd fonts && shasum -a 256 -c MANIFEST.sha256
-      - name: Render sample (self-test)
+      # Same self-test as ci.yml — one script owns the sentinel/font contract.
+      - name: Self-test (fonts + render + assert)
         run: |
-          TYPST=typst ./render.sh sample/sample.md
           pip install --quiet 'pypdf>=5,<7'
-          python3 check_render.py sample/sample.pdf \
-            --min-pages 2 --min-links 6 \
-            --sentinel "paperkit sample document" \
-            --sentinel "PAPERKIT SAMPLE PIPELINE" \
-            --sentinel "THE PIPELINE UNDER TEST" \
-            --require-font Geist --require-font Literata --require-font DejaVuSans
+          TYPST=typst ./sample/selftest.sh
       - name: Package + release (draft -> upload -> publish)
         env:
           GH_TOKEN: ${{ github.token }}

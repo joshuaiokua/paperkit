@@ -50,6 +50,10 @@ pass all three `--require-font`s for figure-bearing documents (figure SVGs name
 DejaVu Sans). A `[N]` citation with no matching References entry fails the render
 itself — that's deliberate.
 
+To exercise the kit end-to-end (verify vendored fonts, render the bundled sample,
+assert every mechanism), run `./sample/selftest.sh` — the same script CI runs, so
+a green local run means a green CI.
+
 Report conventions the pipeline assumes: one leading `# H1` (becomes the PDF
 title), `##` sections, and a `## References` section whose entries are list items
 beginning with `[N]` (those become the link anchors).
