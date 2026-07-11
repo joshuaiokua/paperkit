@@ -18,6 +18,14 @@
 -- for GitHub; the PDF gets real /Title metadata (house.typ's conf feeds it to
 -- `set document`) and re-renders the title through the same level-1 heading
 -- path, so outline/bookmarks and heading hierarchy stay intact.
+local function typst_string(value)
+  local escaped = pandoc.utils.stringify(value)
+    :gsub("\\", "\\\\")
+    :gsub('"', '\\"')
+    :gsub("\n", "\\n")
+  return '"' .. escaped .. '"'
+end
+
 function Pandoc(doc)
   if doc.meta.title == nil then
     for i, b in ipairs(doc.blocks) do
@@ -26,6 +34,29 @@ function Pandoc(doc)
         table.remove(doc.blocks, i)
         break
       end
+    end
+  end
+
+  local running_title = doc.meta["running-title"] or doc.meta.title
+  if running_title ~= nil then
+    table.insert(doc.blocks, 1, pandoc.RawBlock(
+      "typst",
+      "#metadata(" .. typst_string(running_title) .. ") <paperkit-running-title>"
+    ))
+  end
+
+
+  if doc.meta.keywords ~= nil then
+    local keywords = {}
+    for _, keyword in ipairs(doc.meta.keywords) do
+      table.insert(keywords, typst_string(keyword))
+    end
+    doc.meta.keywords = nil
+    if #keywords > 0 then
+      table.insert(doc.blocks, 1, pandoc.RawBlock(
+        "typst",
+        "#metadata((" .. table.concat(keywords, ", ") .. ")) <paperkit-keywords>"
+      ))
     end
   end
   return doc

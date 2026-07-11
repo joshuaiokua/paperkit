@@ -12,6 +12,8 @@
 # falls back to `uv run --with pypdf`.
 set -euo pipefail
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RESEARCH_TYP="$KIT/sample/.research-paper.generated.typ"
+trap 'rm -f "$RESEARCH_TYP"' EXIT
 
 if python3 -c 'import pypdf' 2>/dev/null; then
   PY=(python3)
@@ -32,3 +34,21 @@ fi
   --sentinel "PAPERKIT SAMPLE PIPELINE" \
   --sentinel "THE PIPELINE UNDER TEST" \
   --require-font Geist --require-font Literata --require-font DejaVuSans
+
+PAPERKIT_TYPST_OUT="$RESEARCH_TYP" \
+  "$KIT/render.sh" "$KIT/sample/research-paper.md"
+
+test -s "$RESEARCH_TYP"
+grep -F '#metadata("Retention under intermittent constraint") <paperkit-running-title>' \
+  "$RESEARCH_TYP"
+grep -F '#metadata(("research operations", "evidence quality", "calibration", "asynchronous review")) <paperkit-keywords>' \
+  "$RESEARCH_TYP"
+grep -F '@gelman2014' "$RESEARCH_TYP"
+grep -F '#bibliography(' "$RESEARCH_TYP"
+
+"${PY[@]}" "$KIT/check_render.py" "$KIT/sample/research-paper.pdf" \
+  --min-pages 3 --min-links 2 \
+  --sentinel "Intermittent evaluation preserves calibration" \
+  --sentinel "No estimate" \
+  --sentinel "References" \
+  --require-font Geist --require-font Literata
