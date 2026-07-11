@@ -50,5 +50,5 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --min-pages 3 --min-links 2 \
   --sentinel "Intermittent evaluation preserves calibration" \
   --sentinel "No estimate" \
-  --sentinel "References" \
+  --sentinel "Bibliography" \
   --require-font Geist --require-font Literata
