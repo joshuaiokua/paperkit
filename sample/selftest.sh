@@ -36,7 +36,12 @@ fi
 "${PY[@]}" "$KIT/check_render.py" "$KIT/sample/sample.pdf" \
   --min-pages 2 --min-links 6 \
   --sentinel "paperkit sample document" \
+  --sentinel-count "paperkit sample document=2" \
   --sentinel "PAPERKIT SAMPLE PIPELINE" \
+  --forbid-text "Joshua Iokua" \
+  --require-title "paperkit sample document" \
+  --require-author "Joshua Iokua" \
+  --require-uri-once "https://jiokua.dev" \
   --require-font Geist --require-font Literata --require-font DejaVuSans
 
 PAPERKIT_TYPST_OUT="$RESEARCH_TYP" \
