@@ -133,6 +133,5 @@ review moments are declared in advance, and invalid states remain visible. The p
 recommendation is simple: separate the arrival of evidence from the moment it earns an
 interpretation.
 
-The rendering contract for this paper is documented at https://jiokua.dev. Its source
-remains ordinary Markdown; the branded PDF is a reproducible research artifact rather
-than a manually composed final file.
+Its source remains ordinary Markdown; the branded PDF is a reproducible research
+artifact rather than a manually composed final file.

@@ -37,9 +37,9 @@
     <rect x="206" y="300" width="170" height="34" fill="url(#invalid)" stroke="#8B8E87" stroke-width="1"/>
 
     <g font-family="Geist Mono, DejaVu Sans Mono, monospace" font-size="19" font-weight="600">
-      <text x="705" y="90">0.142</text>
-      <text x="531" y="168" fill="#0016CC">0.091</text>
-      <text x="508" y="246" fill="#0016CC">0.084</text>
+      <text x="740" y="90">0.142</text>
+      <text x="565" y="168" fill="#0016CC">0.091</text>
+      <text x="542" y="246" fill="#0016CC">0.084</text>
       <text x="392" y="324" fill="#585B54">No estimate</text>
     </g>
 

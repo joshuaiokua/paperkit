@@ -2,9 +2,8 @@
 # Kit self-test — the single source of truth for the sample's render contract.
 # Verifies the vendored fonts are intact, renders sample/sample.md, and asserts
 # every mechanism the kit promises: title promotion, [N] citation links, figure
-# SVG text, font embedding, and the running section header (the uppercase
-# sentinel only appears once hydra renders it on page 2). ci.yml and release.yml
-# both call this, so the sentinel and font lists can never drift between them.
+# SVG text, font embedding, and the branded research-paper fixture. ci.yml and
+# release.yml both call this, so the sentinel and font lists cannot drift.
 #
 # Run it locally to reproduce exactly what CI asserts:  ./sample/selftest.sh
 # Honors $TYPST (CI sets it to the setup-typst binary; else render.sh's pin).
@@ -32,7 +31,6 @@ fi
   --min-pages 2 --min-links 6 \
   --sentinel "paperkit sample document" \
   --sentinel "PAPERKIT SAMPLE PIPELINE" \
-  --sentinel "THE PIPELINE UNDER TEST" \
   --require-font Geist --require-font Literata --require-font DejaVuSans
 
 PAPERKIT_TYPST_OUT="$RESEARCH_TYP" \
@@ -50,5 +48,9 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --min-pages 3 --min-links 2 \
   --sentinel "Intermittent evaluation preserves calibration" \
   --sentinel "No estimate" \
-  --sentinel "Bibliography" \
+  --sentinel "Research note" \
+  --sentinel "Keywords" \
+  --sentinel "01 Introduction" \
+  --sentinel "Retention under intermittent constraint" \
+  --sentinel "References" \
   --require-font Geist --require-font Literata
