@@ -77,8 +77,6 @@ keywords:
   - calibration
 bibliography: references.bib
 csl: apa
-figure-caption-position: bottom
-table-caption-position: top
 ---
 ```
 
@@ -177,5 +175,6 @@ tag or update consumer pins.
 
 Pandoc's default Typst template remains in charge. `-V template=house.typ`
 imports only Paperkit's `conf`, so upstream template improvements are not forked.
-The Lua filter transports metadata that Pandoc's fixed argument list does not
-forward by inserting invisible labeled Typst metadata in document content.
+The Lua filter transports metadata that Pandoc's fixed argument list cannot
+forward safely by inserting invisible labeled Typst metadata in document
+content.

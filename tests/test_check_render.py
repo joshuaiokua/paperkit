@@ -43,12 +43,8 @@ class CheckRenderTests(unittest.TestCase):
             "ABCDEF+Geist-Regular": True,
             "GHIJKL+LibertinusSerif": False,
         })
-        self.assertEqual(
-            check_render.unembedded_font_names(fonts),
-            ["GHIJKL+LibertinusSerif"],
-        )
 
-    def test_link_targets_returns_only_external_uri_actions(self):
+    def test_link_facts_counts_all_links_and_returns_only_external_uris(self):
         reader = SimpleNamespace(pages=[{
             "/Annots": Ref([
                 Ref({
@@ -60,7 +56,10 @@ class CheckRenderTests(unittest.TestCase):
             ]),
         }])
 
-        self.assertEqual(check_render.link_targets(reader), ["https://jiokua.dev"])
+        self.assertEqual(
+            check_render._link_facts(reader),
+            (2, ["https://jiokua.dev"]),
+        )
 
     def test_structure_alt_texts_recurses_and_tagged_pdf_requires_marking(self):
         root = Ref({

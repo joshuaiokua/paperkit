@@ -35,19 +35,8 @@ def _resolve(value):
     return value.get_object() if hasattr(value, "get_object") else value
 
 
-def count_links(reader: PdfReader) -> int:
-    n = 0
-    for page in reader.pages:
-        annots = page.get("/Annots")
-        if annots is None:
-            continue
-        for a in _resolve(annots):
-            if _resolve(a).get("/Subtype") == "/Link":
-                n += 1
-    return n
-
-
-def link_targets(reader: PdfReader) -> list[str]:
+def _link_facts(reader: PdfReader) -> tuple[int, list[str]]:
+    count = 0
     targets: list[str] = []
     for page in reader.pages:
         annots = page.get("/Annots")
@@ -57,10 +46,11 @@ def link_targets(reader: PdfReader) -> list[str]:
             annot = _resolve(ref)
             if annot.get("/Subtype") != "/Link":
                 continue
+            count += 1
             action = _resolve(annot.get("/A"))
             if action and action.get("/S") == "/URI" and action.get("/URI"):
                 targets.append(str(action["/URI"]))
-    return targets
+    return count, targets
 
 
 def _font_has_program(font: dict) -> bool:
@@ -93,10 +83,6 @@ def embedded_fonts(reader: PdfReader) -> dict[str, bool]:
                 embedded = _font_has_program(candidate)
                 fonts_by_name[name] = fonts_by_name.get(name, True) and embedded
     return fonts_by_name
-
-
-def unembedded_font_names(fonts: dict[str, bool]) -> list[str]:
-    return sorted(name for name, embedded in fonts.items() if not embedded)
 
 
 def document_metadata(reader: PdfReader) -> dict[str, str]:
@@ -146,10 +132,11 @@ def structure_alt_texts(reader: PdfReader) -> list[str]:
 
 def parse_count_requirement(value: str) -> tuple[str, int]:
     try:
-        text, count = value.rsplit("=", 1)
-        if not text or int(count) < 0:
+        text, count_value = value.rsplit("=", 1)
+        count = int(count_value)
+        if not text or count < 0:
             raise ValueError
-        return text, int(count)
+        return text, count
     except ValueError as exc:
         raise ValueError("count requirement must be TEXT=COUNT") from exc
 
@@ -189,7 +176,9 @@ def validation_failures(
             fails.append(f"text count for {expected_text!r}: "
                          f"{actual_count} != {expected_count}")
 
-    unembedded = unembedded_font_names(fonts)
+    unembedded = sorted(
+        name for name, embedded in fonts.items() if not embedded
+    )
     if unembedded:
         fails.append("fonts without embedded font programs: " + ", ".join(unembedded))
     for required_font in (requirements.require_font or ["Geist", "Literata"]):
@@ -271,8 +260,7 @@ def main() -> int:
     page_count = len(reader.pages)
     text = " ".join((page.extract_text() or "") for page in reader.pages)
     fonts = embedded_fonts(reader)
-    link_count = count_links(reader)
-    uris = link_targets(reader)
+    link_count, uris = _link_facts(reader)
     metadata = document_metadata(reader)
     tagged = is_tagged_pdf(reader)
     alt_texts = structure_alt_texts(reader)

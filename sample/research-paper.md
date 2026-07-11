@@ -20,8 +20,6 @@ keywords:
   - asynchronous review
 bibliography: references.bib
 csl: apa
-figure-caption-position: bottom
-table-caption-position: top
 ---
 
 ## Introduction

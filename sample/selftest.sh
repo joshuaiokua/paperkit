@@ -14,9 +14,15 @@ KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RESEARCH_TYP="$KIT/sample/.research-paper.generated.typ"
 TYPST_BIN="${TYPST:-$KIT/bin/typst}"
 VISUAL_DIR="$(mktemp -d "${TMPDIR:-/tmp}/paperkit-visual.XXXXXX")"
+RICH_TITLE_MD="$VISUAL_DIR/rich-title.md"
 cleanup() {
   rm -f "$RESEARCH_TYP"
   rm -rf "$VISUAL_DIR"
+}
+verify_manifest() {
+  local directory="$1"
+  local manifest="${2:-MANIFEST.sha256}"
+  (cd "$directory" && shasum -a 256 -c "$manifest")
 }
 trap cleanup EXIT
 
@@ -29,7 +35,7 @@ else
   exit 2
 fi
 
-( cd "$KIT/fonts" && shasum -a 256 -c MANIFEST.sha256 )
+verify_manifest "$KIT/fonts"
 
 "$KIT/render.sh" "$KIT/sample/sample.md"
 
@@ -43,6 +49,28 @@ fi
   --require-author "Joshua Iokua" \
   --require-uri-once "https://jiokua.dev" \
   --require-font Geist --require-font Literata --require-font DejaVuSans
+
+printf '%s\n' \
+  '# *Linked* [title](https://example.com)' \
+  '' \
+  'The visible title keeps its authored formatting and link.' \
+  '' \
+  '```{=typst}' \
+  '#pagebreak()' \
+  '```' \
+  '' \
+  'The second-page running title must be plain and unlinked.' \
+  > "$RICH_TITLE_MD"
+
+"$KIT/render.sh" "$RICH_TITLE_MD"
+
+"${PY[@]}" "$KIT/check_render.py" "${RICH_TITLE_MD%.md}.pdf" \
+  --min-pages 2 --min-links 1 \
+  --sentinel-count "Linked title=2" \
+  --require-title "Linked title" \
+  --require-author "Joshua Iokua" \
+  --require-uri-once "https://example.com" \
+  --require-font Geist --require-font Literata
 
 PAPERKIT_TYPST_OUT="$RESEARCH_TYP" \
   "$KIT/render.sh" "$KIT/sample/research-paper.md"
@@ -61,6 +89,8 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --sentinel "No estimate" \
   --sentinel "Research note" \
   --sentinel "Keywords" \
+  --sentinel "research operations" \
+  --sentinel "asynchronous review" \
   --sentinel "01 Introduction" \
   --sentinel "Retention under intermittent constraint" \
   --sentinel "References" \
@@ -74,7 +104,7 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --require-alt "Calibration error relative to the continuous-monitoring condition" \
   --require-font Geist --require-font Literata
 
-(cd "$KIT/sample/goldens" && shasum -a 256 -c MANIFEST.sha256)
+verify_manifest "$KIT/sample/goldens"
 
 "$TYPST_BIN" compile "$RESEARCH_TYP" \
   "$VISUAL_DIR/research-paper-{0p}.png" \
@@ -84,7 +114,7 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --ppi=144
 
 test "$(find "$VISUAL_DIR" -name 'research-paper-*.png' | wc -l | tr -d ' ')" -eq 3
-(cd "$VISUAL_DIR" && shasum -a 256 -c "$KIT/sample/goldens/MANIFEST.sha256")
+verify_manifest "$VISUAL_DIR" "$KIT/sample/goldens/MANIFEST.sha256"
 
 if PAPERKIT_TYPST_OUT="$VISUAL_DIR/outside.typ" \
   "$KIT/render.sh" "$KIT/sample/research-paper.md" "$VISUAL_DIR/outside.pdf" \

@@ -40,6 +40,7 @@ function Pandoc(doc)
     end
   end
 
+  -- Flatten rich title content so running furniture stays plain and unlinked.
   local running_title = doc.meta["running-title"] or doc.meta.title
   if running_title ~= nil then
     table.insert(doc.blocks, 1, pandoc.RawBlock(
@@ -48,7 +49,8 @@ function Pandoc(doc)
     ))
   end
 
-
+  -- Pandoc 3.10 emits multiword native keywords as invalid Typst arguments
+  -- (`keywords: (research operations,...)`), so serialize them explicitly.
   if doc.meta.keywords ~= nil then
     local keywords = {}
     for _, keyword in ipairs(doc.meta.keywords) do

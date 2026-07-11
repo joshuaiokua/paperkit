@@ -6,6 +6,14 @@
 
 #import "brand.typ": *
 
+#let accent-label(body, size: 7.5pt) = text(
+  font: font-mono,
+  size: size,
+  weight: 600,
+  fill: accent,
+  body,
+)
+
 #let conf(doc, ..args) = {
   let a = args.named()
   let title = a.at("title", default: none)
@@ -85,12 +93,7 @@
     #grid(
       columns: (28pt, 1fr),
       column-gutter: 8pt,
-      [#text(
-        font: font-mono,
-        size: 8pt,
-        weight: 600,
-        fill: accent,
-      )[#context section-counter.display("01")]],
+      [#accent-label(size: 8pt)[#context section-counter.display("01")]],
       [#text(font: font-heading, size: 13pt, weight: weight-heading)[#it.body]],
     )
   ]
@@ -129,12 +132,7 @@
   show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: image): set figure.caption(position: bottom)
   show figure.caption: it => align(left, block(width: 100%, above: 0.35em)[
-      #text(
-        font: font-mono,
-        size: 7.5pt,
-        weight: 600,
-        fill: accent,
-      )[#it.supplement #context it.counter.display(it.numbering)]
+      #accent-label[#it.supplement #context it.counter.display(it.numbering)]
       #h(0.45em)
       #text(size: 8.5pt, fill: muted)[#it.body]
     ])
@@ -173,12 +171,9 @@
       above: 0.3em,
       below: 0.65em,
     )[
-      #text(
-        font: font-mono,
-        size: 7.75pt,
-        weight: 600,
-        fill: accent,
-      )[#if abstract-title != none { abstract-title } else { [Abstract] }]
+      #accent-label(size: 7.75pt)[
+        #if abstract-title != none { abstract-title } else { [Abstract] }
+      ]
       #v(0.45em)
       #set text(size: 9.25pt, fill: ink)
       #set par(leading: 0.6em, spacing: 0.7em)
@@ -191,12 +186,7 @@
     if matches.len() > 0 {
       let values = matches.first().value
       block(above: 0.55em, below: 1.35em)[
-        #text(
-          font: font-mono,
-          size: 7.5pt,
-          weight: 600,
-          fill: accent,
-        )[Keywords]
+        #accent-label[Keywords]
         #h(0.65em)
         #(
           values
