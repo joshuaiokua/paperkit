@@ -118,8 +118,13 @@ For debugging or visual-regression work, keep the normal PDF output and request
 the exact standalone Typst source at the same time:
 
 ```sh
-PAPERKIT_TYPST_OUT=/tmp/paper.typ ./render.sh path/to/paper.md
+PAPERKIT_TYPST_OUT=path/to/paper.typ ./render.sh path/to/paper.md
 ```
+
+Keep the `.typ` artifact beside its source Markdown. Pandoc preserves relative
+image, bibliography, and CSL paths in Typst output, so `render.sh` rejects a
+`PAPERKIT_TYPST_OUT` destination outside the report directory instead of
+producing a misleading artifact with broken resources.
 
 ## Verify the kit
 

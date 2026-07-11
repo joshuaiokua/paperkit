@@ -67,6 +67,15 @@ if [ -n "${PAPERKIT_TYPST_OUT:-}" ]; then
     /*) TYPST_OUT="$PAPERKIT_TYPST_OUT" ;;
     *) TYPST_OUT="$CALLER_DIR/$PAPERKIT_TYPST_OUT" ;;
   esac
+  TYPST_OUT_DIR="$(cd "$(dirname "$TYPST_OUT")" 2>/dev/null && pwd)" || {
+    echo "render: PAPERKIT_TYPST_OUT directory does not exist" >&2
+    exit 2
+  }
+  if [ "$TYPST_OUT_DIR" != "$REPORT_DIR" ]; then
+    echo "render: PAPERKIT_TYPST_OUT must be in the report directory ($REPORT_DIR)" >&2
+    exit 2
+  fi
+  TYPST_OUT="$TYPST_OUT_DIR/$(basename "$TYPST_OUT")"
   (cd "$REPORT_DIR" && pandoc "${PANDOC_ARGS[@]}" -t typst -o "$TYPST_OUT")
 fi
 

@@ -74,6 +74,8 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --require-alt "Calibration error relative to the continuous-monitoring condition" \
   --require-font Geist --require-font Literata
 
+(cd "$KIT/sample/goldens" && shasum -a 256 -c MANIFEST.sha256)
+
 "$TYPST_BIN" compile "$RESEARCH_TYP" \
   "$VISUAL_DIR/research-paper-{0p}.png" \
   --root=/ \
@@ -83,3 +85,11 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
 
 test "$(find "$VISUAL_DIR" -name 'research-paper-*.png' | wc -l | tr -d ' ')" -eq 3
 (cd "$VISUAL_DIR" && shasum -a 256 -c "$KIT/sample/goldens/MANIFEST.sha256")
+
+if PAPERKIT_TYPST_OUT="$VISUAL_DIR/outside.typ" \
+  "$KIT/render.sh" "$KIT/sample/research-paper.md" "$VISUAL_DIR/outside.pdf" \
+  >"$VISUAL_DIR/outside.log" 2>&1; then
+  echo "selftest: PAPERKIT_TYPST_OUT outside the report directory unexpectedly succeeded" >&2
+  exit 1
+fi
+grep -F "PAPERKIT_TYPST_OUT must be in the report directory" "$VISUAL_DIR/outside.log"

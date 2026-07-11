@@ -105,6 +105,96 @@ class CheckRenderTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "TEXT=COUNT"):
             check_render.parse_count_requirement("missing-count")
 
+    def test_validation_failures_cover_new_negative_contracts(self):
+        def requirements(**overrides):
+            values = {
+                "min_pages": 2,
+                "sentinel": [],
+                "forbid_text": [],
+                "sentinel_count": [],
+                "require_font": ["Geist", "Literata"],
+                "forbid_font": ["Libertinus"],
+                "min_links": 0,
+                "require_uri_once": [],
+                "require_title": None,
+                "require_author": None,
+                "require_alt": [],
+            }
+            values.update(overrides)
+            return SimpleNamespace(**values)
+
+        facts = {
+            "page_count": 3,
+            "text": "running running",
+            "fonts": {"AAAAAA+Geist-Regular": True, "BBBBBB+Literata": True},
+            "link_count": 2,
+            "uris": ["https://jiokua.dev"],
+            "metadata": {"title": "Paper title", "author": "Joshua Iokua"},
+            "tagged": True,
+            "alt_texts": ["Calibration chart"],
+        }
+        cases = [
+            (
+                "wrong title",
+                requirements(require_title="Expected title"),
+                {},
+                "PDF title",
+            ),
+            (
+                "wrong author",
+                requirements(require_author="Expected Author"),
+                {},
+                "PDF author",
+            ),
+            (
+                "missing tags",
+                requirements(),
+                {"tagged": False},
+                "PDF is not tagged",
+            ),
+            (
+                "missing alt",
+                requirements(require_alt=["Missing chart"]),
+                {},
+                "required structure alt text missing",
+            ),
+            (
+                "duplicate URI",
+                requirements(require_uri_once=["https://jiokua.dev"]),
+                {"uris": ["https://jiokua.dev", "https://jiokua.dev"]},
+                "URI annotations",
+            ),
+            (
+                "forbidden fallback",
+                requirements(),
+                {"fonts": {**facts["fonts"], "CCCCCC+LibertinusSerif": True}},
+                "forbidden font",
+            ),
+            (
+                "wrong text count",
+                requirements(sentinel_count=["running=3"]),
+                {},
+                "text count",
+            ),
+            (
+                "unembedded font",
+                requirements(),
+                {"fonts": {**facts["fonts"], "DDDDDD+Other": False}},
+                "fonts without embedded font programs",
+            ),
+        ]
+
+        for label, requested, fact_overrides, expected in cases:
+            with self.subTest(label=label):
+                failures = check_render.validation_failures(
+                    requested,
+                    **{**facts, **fact_overrides},
+                )
+                self.assertTrue(
+                    any(expected in failure for failure in failures),
+                    failures,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
