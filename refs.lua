@@ -1,15 +1,18 @@
--- refs.lua — make a milestone PDF's references actually work.
+-- refs.lua — normalize paper metadata and preserve legacy reference behavior.
 --
---   1. Inline bracketed citation markers [N] become internal links to the
+--   1. The resolved title and keyword list become invisible labeled Typst
+--      metadata for the house template's running furniture and title matter.
+--   2. Inline bracketed citation markers [N] become internal links to the
 --      matching bibliography entry (anchored ref-N).
---   2. Bullet-list items that BEGIN with [N] (the bibliography) get the ref-N
+--   3. Bullet-list items that BEGIN with [N] (the bibliography) get the ref-N
 --      anchor. The marker inside the entry self-links — harmless.
---   3. Relative links to sibling .md files (run-report cross-links) are
+--   4. Relative links to sibling .md files (run-report cross-links) are
 --      unlinked: a PDF cannot resolve them, so their text stays as plain text.
 --      The markdown source keeps the real links for GitHub.
 --
--- Bare URLs are made clickable by `+autolink_bare_uris` in the pandoc
--- invocation (render.sh / the installed workflows), not by this filter.
+-- Native [@key] citations are deliberately untouched: Pandoc's Typst writer
+-- passes them to Typst's bibliography engine. Bare URLs are made clickable by
+-- `+autolink_bare_uris` in render.sh, not by this filter.
 -- If a [N] has no matching bibliography anchor, typst fails the render loudly
 -- (unknown label) — that is a feature: a dangling reference is a report bug.
 

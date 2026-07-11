@@ -1,109 +1,176 @@
 # paperkit
 
-Markdown in, branded accessible PDF out. paperkit is a personal report/paper
-rendering toolkit: a typst house template + brand tokens, a pandoc Lua filter for
-document shape, vendored fonts, render/check scripts, and installable CI workflows —
-**everything pinned by exact version and checksum**, including the kit itself when
-consumed from another repository.
+Markdown in, personally branded research paper out. Paperkit is a pinned
+Pandoc + Typst pipeline for producing accessible, journal-like PDFs with a
+quiet Jiokua visual register.
 
-- **Markdown is content, typst is styling.** Reports stay readable on GitHub; the
-  PDF is generated, never committed.
-- **Accessible by construction.** Every render is exported as PDF/UA-1; typst
-  enforces the standard's machine-checkable rules at compile time, so an
-  accessibility violation is a build failure.
-- **Loud failure over silent fallback.** typst exits 0 on a missing font;
-  `check_render.py` is the actual guard — embedded-font assertions, per-figure
-  text sentinels, link counts, page counts.
-- **Boundary rule: paperkit may *style* figures; it is never required to
-  *reproduce* them.** Data figures are generated in the repos that own the data
-  (science stack: matplotlib/seaborn, regenerated from each repo's own lockfile);
-  paperkit consumes them as committed SVGs.
+- **Markdown is content; Typst is presentation.** Papers remain readable in
+  source control and reproducible in CI.
+- **Accessible by construction.** Every PDF is exported as PDF/UA-1, and the
+  self-test verifies tagging, figure alt text, metadata, links, and real font
+  programs.
+- **Branded without a visible byline.** The first page carries a single
+  clickable `jiokua.dev` identity line. Later pages use an unlinked running
+  title and site label. `Joshua Iokua` remains in PDF author metadata only.
+- **Figures stay evidence-owned.** Producer repositories generate
+  presentation-ready SVGs from their own data and lockfiles. Paperkit places,
+  numbers, captions, and validates them; it does not reproduce analyses.
+- **Everything is pinned.** Typst, Pandoc in CI, fonts, workflow assets, and
+  consumer releases are exact-version or checksum pinned.
+
+## The paper register
+
+The default output is US Letter, one column, near-white paper, and about 1.25in
+side margins. Body copy is ragged-right 10.5pt Geist; titles and headings use
+Literata; metadata, measures, section labels, and page furniture use Geist Mono.
+
+The visible hierarchy is intentionally restrained:
+
+- no author, affiliation, correspondence, or report-style ruled chrome;
+- blue two-digit labels on top-level sections, with lower headings unnumbered;
+- transparent, square-cornered research-note/abstract block with a neutral
+  hairline;
+- inline keywords;
+- readable tables with captions above, no vertical rules, tabular mono values,
+  and an accent-mist header row;
+- full-measure figures with left-aligned captions below;
+- page-number-only footer.
+
+See [FIGURE_STYLE.md](FIGURE_STYLE.md) for the graph grammar and producer
+handoff contract.
 
 ## What's in the box
 
 | file | role |
 |---|---|
-| `house.typ` | layout: page furniture, running section header, ruled headings, figures |
-| `brand.typ` | every brand value — colors, faces, weights; the single re-skin point |
-| `refs.lua` | pandoc AST work: H1→title promotion, `[N]`→anchor links (dangling ref = loud failure), sibling-`.md` unlink |
-| `render.sh <md> [out.pdf]` | the whole render: pandoc → typst, UA-1, vendored fonts |
-| `check_render.py <pdf>` | the guard: pages, sentinels, embedded fonts, link count |
-| `bootstrap.sh` | one-time local install of the pinned typst (sha-verified) |
-| `fonts/` | vendored faces + per-family licenses ([provenance](fonts/README.md)) |
-| `vendor/` | vendored typst packages (hydra + its dependency) — compiles offline |
-| `templates/` | the two workflow files consumers install |
-| `sample/` | the self-test document CI renders on every push |
+| `house.typ` | page, title, section, table, figure, bibliography, and running-furniture layout |
+| `brand.typ` | colors, type families, weights, and fixed brand identity |
+| `refs.lua` | title promotion, running-title/keyword transport, manual `[N]` compatibility, sibling-Markdown unlinking |
+| `render.sh <md> [out.pdf]` | Pandoc 3.10 -> Typst 0.14.2 -> PDF/UA-1 |
+| `check_render.py <pdf>` | structural guard for pages, text, metadata, links, tags, alt text, and embedded fonts |
+| `FIGURE_STYLE.md` | producer-side chart and figure specification |
+| `sample/research-paper.md` | multi-page research-paper stress specimen using native citations |
+| `sample/goldens/` | committed 144-PPI visual baselines and SHA-256 manifest |
+| `sample/selftest.sh` | the single integration contract used locally, in CI, and before release |
+| `bootstrap.sh` | checksum-pinned Typst installer and local toolchain check |
+| `fonts/` | vendored typefaces and licenses |
+| `templates/` | consumer render and release workflows |
 
-## Local use
+`vendor/` retains the previously vendored Typst package snapshot, but the v0.2
+house template has no external package dependency.
 
-```sh
-./bootstrap.sh                    # installs typst 0.14.2 into bin/ (sha-pinned)
-./render.sh path/to/report.md    # -> path/to/report.pdf (PDF/UA-1)
-python3 check_render.py path/to/report.pdf \
-  --min-pages 2 --min-links 20 \
-  --sentinel "Figure 1 title text" \
-  --require-font Geist --require-font Literata --require-font DejaVuSans
+## Write a paper
+
+Use ordinary Pandoc Markdown with research metadata:
+
+```yaml
+---
+title: Intermittent Evaluation Preserves Calibration
+subtitle: A field note on evidence quality and review cadence
+running-title: Retention under intermittent constraint
+date: 2026-07-10
+abstract-title: Research note
+abstract: |
+  A concise statement of the question, method, result, and boundary.
+keywords:
+  - research operations
+  - calibration
+bibliography: references.bib
+csl: apa
+figure-caption-position: bottom
+table-caption-position: top
+---
 ```
 
-`check_render.py` needs `pypdf>=5,<7`. Defaults assert Geist + Literata embedded;
-pass all three `--require-font`s for figure-bearing documents (figure SVGs name
-DejaVu Sans). A `[N]` citation with no matching References entry fails the render
-itself — that's deliberate.
+Use native citation keys in prose:
 
-To exercise the kit end-to-end (verify vendored fonts, render the bundled sample,
-assert every mechanism), run `./sample/selftest.sh` — the same script CI runs, so
-a green local run means a green CI.
+```markdown
+Pre-registration separates planned analysis from outcome-contingent choices
+[@nosek2018].
+```
 
-Report conventions the pipeline assumes: one leading `# H1` (becomes the PDF
-title), `##` sections, and a `## References` section whose entries are list items
-beginning with `[N]` (those become the link anchors).
+Pandoc leaves the citation native in Typst and Typst formats the bibliography
+using the requested built-in style or CSL file. Do not add a Markdown
+`## References` heading for a native bibliography; Typst emits the branded
+`References` section. Legacy `[N]` markers and bullet-list references remain
+supported for existing documents, but they are compatibility behavior, not the
+new-paper default.
 
-## Consumer install (CI)
+Render and validate:
 
-Copy the two files from `templates/` into your repo's `.github/workflows/`, then
-set the pin at the top of each:
+```sh
+./bootstrap.sh
+./render.sh path/to/paper.md
+python3 check_render.py path/to/paper.pdf \
+  --require-title "Paper title" \
+  --require-author "Joshua Iokua" \
+  --require-uri-once "https://jiokua.dev" \
+  --require-font Geist \
+  --require-font Literata
+```
+
+`check_render.py` needs `pypdf>=5,<7`. Explicit `--require-font` values replace
+the default Geist + Literata requirement. Every encountered font must contain a
+real embedded font program, and Libertinus is forbidden by default to catch
+silent Typst fallback.
+
+For debugging or visual-regression work, keep the normal PDF output and request
+the exact standalone Typst source at the same time:
+
+```sh
+PAPERKIT_TYPST_OUT=/tmp/paper.typ ./render.sh path/to/paper.md
+```
+
+## Verify the kit
+
+Run the same end-to-end contract as CI:
+
+```sh
+./sample/selftest.sh
+```
+
+It verifies vendored font checksums, renders the legacy compatibility sample,
+renders the research specimen, inspects PDF metadata and structure, asserts the
+running-header/link contract, compiles the standalone Typst source to three PNG
+pages at 144 PPI, and compares them against `sample/goldens/MANIFEST.sha256`.
+Visual changes therefore require an intentional render, page-by-page review,
+and golden update.
+
+## Consumer install
+
+Copy `templates/render.yml` and `templates/release.yml` into the consumer
+repository. Keep the current release pin and digest together:
 
 ```yaml
 env:
-  PAPERKIT_REF: v0.1.0
-  PAPERKIT_SHA256: "<asset digest — printed by paperkit's release workflow>"
+  PAPERKIT_REF: v0.1.1
+  PAPERKIT_SHA256: "57a84b4c09edb3ec4e402c4afca0952096619cf6b79b7f118619e00948093e4a"
 ```
 
-That's the entire installation. The workflows fetch
-`releases/download/<ref>/paperkit-<ref>.tar.gz` (public repo — no token), verify
-the sha256, and use the extracted kit. Upgrading = bumping the two env lines,
-reviewed like any dependency.
+Do not point consumers at the feature branch. After the immutable v0.2.0 release
+is published, replace both values with the released tag and asset digest in one
+reviewed change.
 
-## Versioning
+## Versioning and release
 
-Tags are immutable — this repo has GitHub release immutability enabled, so
-published releases and their assets are platform-locked and tag names are never
-reusable. Fixes ship as a new tag; consumers move by choice. The release workflow
-prints each asset's sha256 digest (GitHub computes it at upload) for pinning.
+Tags and release assets are immutable. Fixes ship as a new tag; consumers move
+only by updating their exact tag and SHA-256 pin. The release workflow re-runs
+the complete self-test before packaging the repository and prints GitHub's asset
+digest for consumers.
 
-## Pinned toolchain (recorded 2026-07-07)
+This branch prepares the v0.2.0 research-paper default. It does not publish the
+tag or update consumer pins.
+
+## Pinned toolchain
 
 | thing | pin |
 |---|---|
-| typst | **0.14.2 exact** (0.15 is breaking and postdates pandoc 3.10) |
-| pandoc | **3.10 exact** in CI (sha-verified deb) · `>= 3.9` floor locally |
-| hydra (running headers) | **0.6.3**, vendored in `vendor/` with its dependency (oxifmt 1.0.0) |
-| fonts | Geist v1.7.2 · Literata 3.103 @ frozen repo · DejaVu 2.37 — [all pins](fonts/README.md) |
-| pypdf | `>= 5, < 7` |
+| Typst | **0.14.2 exact** |
+| Pandoc | **3.10 exact** in CI; `>=3.9` floor locally |
+| fonts | Geist 1.7.2; Literata 3.103; DejaVu 2.37 |
+| pypdf | `>=5,<7` |
 
-## Mechanism notes
-
-- **`-V template=`, not `--template`**: pandoc's default typst template stays in
-  charge (it survives pandoc upgrades) and imports `conf` from `house.typ`;
-  `--root=/` lets typst resolve the absolute template path, and `brand.typ`
-  resolves relative to `house.typ`.
-- **Metadata is our job**: replacing `conf` means `set document(title:)` must
-  happen in `house.typ`, or the PDF `/Title` silently vanishes (`refs.lua`
-  promotes the leading H1 when no front-matter title exists).
-- **Reproducible stamps**: `render.sh` sets `SOURCE_DATE_EPOCH` from the report's
-  last commit time (0 for uncommitted drafts).
-- **Running header**: the current `##` section on pages 2+, muted mono caps —
-  a tagged-PDF artifact, so it may never contain links (PDF/UA-1).
-- **Brand**: all values live in `brand.typ`, translated from the portfolio's
-  design tokens; two deliberate print-specific deviations are documented inline
-  there. v0.1.0 spends exactly one accent: link blue.
+Pandoc's default Typst template remains in charge. `-V template=house.typ`
+imports only Paperkit's `conf`, so upstream template improvements are not forked.
+The Lua filter transports metadata that Pandoc's fixed argument list does not
+forward by inserting invisible labeled Typst metadata in document content.

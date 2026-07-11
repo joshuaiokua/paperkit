@@ -1,9 +1,8 @@
 name: ci
 
-# Self-test: render the sample document through render.sh and gate it with
-# check_render.py. The sample exercises every mechanism the kit promises —
-# title promotion, [N] citation links, figure SVG text, font embedding,
-# PDF/UA-1 — so a regression fails here before any consumer repo can see it.
+# Self-test: render the legacy compatibility sample and branded research-paper
+# specimen, validate PDF/UA structure/metadata/fonts/links, and compare the
+# research paper against committed PNG goldens.
 on:
   push:
     branches: ["**"]
@@ -25,14 +24,15 @@ jobs:
           curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.10/pandoc-3.10-1-amd64.deb
           echo "d502599878eb29af3ae5f0cb5d559134df96534125d452c7a0674a5bad2c5ecf  /tmp/pandoc.deb" | sha256sum -c -
           sudo dpkg -i /tmp/pandoc.deb
-      # Font verify + render + assert live in one script (sample/selftest.sh) so
-      # the sentinel/font contract can't drift between this workflow and release.yml.
-      - name: Self-test (fonts + render + assert)
+      # One script owns the entire structural and visual contract.
+      - name: Self-test (fonts + PDFs + visual goldens)
         run: |
           pip install --quiet 'pypdf>=5,<7'
           TYPST=typst ./sample/selftest.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: sample-pdf
-          path: sample/sample.pdf
+          name: sample-pdfs
+          path: |
+            sample/sample.pdf
+            sample/research-paper.pdf
           if-no-files-found: error

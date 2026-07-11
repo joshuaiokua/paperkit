@@ -26,8 +26,8 @@ jobs:
           curl -fsSL -o /tmp/pandoc.deb https://github.com/jgm/pandoc/releases/download/3.10/pandoc-3.10-1-amd64.deb
           echo "d502599878eb29af3ae5f0cb5d559134df96534125d452c7a0674a5bad2c5ecf  /tmp/pandoc.deb" | sha256sum -c -
           sudo dpkg -i /tmp/pandoc.deb
-      # Same self-test as ci.yml — one script owns the sentinel/font contract.
-      - name: Self-test (fonts + render + assert)
+      # Same structural + visual contract as ci.yml.
+      - name: Self-test (fonts + PDFs + visual goldens)
         run: |
           pip install --quiet 'pypdf>=5,<7'
           TYPST=typst ./sample/selftest.sh

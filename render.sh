@@ -30,8 +30,8 @@ REPO_ROOT="$(git -C "$REPORT_DIR" rev-parse --show-toplevel 2>/dev/null || echo 
 TEMPLATE="$KIT/house.typ"
 FILTER="$KIT/refs.lua"
 
-# Hermetic typst packages (hydra): vendored under vendor/, resolved before the
-# package cache and before any network download.
+# Keep the vendored package path ahead of user caches for offline compatibility.
+# The v0.2 house template itself has no external Typst package dependency.
 export TYPST_PACKAGE_PATH="$KIT/vendor"
 
 # Reproducible PDF timestamps: the report's last-commit time (0 for uncommitted drafts).
