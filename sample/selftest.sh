@@ -12,7 +12,13 @@
 set -euo pipefail
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RESEARCH_TYP="$KIT/sample/.research-paper.generated.typ"
-trap 'rm -f "$RESEARCH_TYP"' EXIT
+TYPST_BIN="${TYPST:-$KIT/bin/typst}"
+VISUAL_DIR="$(mktemp -d "${TMPDIR:-/tmp}/paperkit-visual.XXXXXX")"
+cleanup() {
+  rm -f "$RESEARCH_TYP"
+  rm -rf "$VISUAL_DIR"
+}
+trap cleanup EXIT
 
 if python3 -c 'import pypdf' 2>/dev/null; then
   PY=(python3)
@@ -53,4 +59,22 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --sentinel "01 Introduction" \
   --sentinel "Retention under intermittent constraint" \
   --sentinel "References" \
+  --sentinel-count "Retention under intermittent constraint=2" \
+  --sentinel-count "jiokua.dev=3" \
+  --forbid-text "Joshua Iokua" \
+  --forbid-text "Bibliography" \
+  --require-title "Intermittent Evaluation Preserves Calibration Under Sparse Feedback" \
+  --require-author "Joshua Iokua" \
+  --require-uri-once "https://jiokua.dev" \
+  --require-alt "Calibration error relative to the continuous-monitoring condition" \
   --require-font Geist --require-font Literata
+
+"$TYPST_BIN" compile "$RESEARCH_TYP" \
+  "$VISUAL_DIR/research-paper-{0p}.png" \
+  --root=/ \
+  --font-path="$KIT/fonts" \
+  --ignore-system-fonts \
+  --ppi=144
+
+test "$(find "$VISUAL_DIR" -name 'research-paper-*.png' | wc -l | tr -d ' ')" -eq 3
+(cd "$VISUAL_DIR" && shasum -a 256 -c "$KIT/sample/goldens/MANIFEST.sha256")
