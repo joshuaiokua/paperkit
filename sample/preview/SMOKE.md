@@ -3,7 +3,7 @@
 Run `./sample/preview-research-paper.sh`, open the printed loopback URL, and
 complete this short matrix before handing off preview UI changes:
 
-1. Confirm all three pages appear together, the short PDF hash and page count
+1. Confirm all pages appear together, the short PDF hash and page count
    match `manifest.json`, the exact-PDF link opens, and the console is clean.
 2. Drag forward, backward, and beyond a page edge with a mouse or pen. Confirm
    the visible box, URL fragment, JSON readout, and `#preview` dataset describe
