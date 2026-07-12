@@ -1,4 +1,5 @@
 /sample/preview-research-paper.sh export-ignore
+/sample/preview export-ignore
 /sample/preview/** export-ignore
 /tests/test_preview_script.py export-ignore
 /tests/test_preview_companion.mjs export-ignore

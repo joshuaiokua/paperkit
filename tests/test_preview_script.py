@@ -446,6 +446,7 @@ class PreviewScriptTests(unittest.TestCase):
         self.assertFalse(
             any(
                 name == "sample/preview-research-paper.sh"
+                or name == "sample/preview"
                 or name.startswith("sample/preview/")
                 or name in {
                     "tests/test_preview_script.py",
