@@ -26,8 +26,21 @@
   let cols = a.at("cols", default: 1)
   let section-counter = counter("paperkit-section")
 
-  // Author identity is document metadata, never visible paper furniture.
-  set document(title: title, author: "Joshua Iokua")
+  // Author identity and editorial fields are document metadata, never visible
+  // paper furniture.
+  context {
+    let value = (label, default: none) => {
+      let matches = query(label)
+      if matches.len() > 0 { matches.first().value } else { default }
+    }
+    set document(
+      title: title,
+      author: "Joshua Iokua",
+      description: value(<paperkit-description>),
+      keywords: value(<paperkit-keywords>, default: ()),
+      date: value(<paperkit-authored-date>, default: none),
+    )
+  }
 
   set page(
     paper: "us-letter",
@@ -76,7 +89,7 @@
 
   set text(
     font: font-body,
-    size: 10.5pt,
+    size: 10.75pt,
     lang: lang,
     region: region,
     fill: ink,
@@ -85,20 +98,29 @@
 
   set heading(numbering: none)
   show heading: set text(font: font-heading, weight: weight-heading)
-  show heading.where(level: 1): it => block(above: 0.5em, below: 0.85em)[
-    #text(size: 24pt)[#it.body]
+  show heading.where(level: 1, outlined: true): it => block(above: 1.7em, below: 0.6em, sticky: true)[
+    #text(size: 16pt)[#it.body]
   ]
-  show heading.where(level: 2): it => block(above: 1.7em, below: 0.72em)[
+  show heading.where(level: 2): it => block(above: 1.5em, below: 0.45em, sticky: true)[
     #section-counter.step()
     #grid(
-      columns: (28pt, 1fr),
-      column-gutter: 8pt,
-      [#accent-label(size: 8pt)[#context section-counter.display("01")]],
-      [#text(font: font-heading, size: 13pt, weight: weight-heading)[#it.body]],
+      columns: (0pt, 1fr),
+      column-gutter: 0pt,
+      align: (right + horizon, left + horizon),
+      [#move(dx: -7pt)[
+        #accent-label(size: 7.5pt)[#context section-counter.display("01")]
+      ]],
+      [#text(font: font-heading, size: 12.5pt, weight: weight-heading)[#it.body]],
     )
   ]
-  show heading.where(level: 3): it => block(above: 1.35em, below: 0.52em)[
-    #text(size: 10.75pt)[#it.body]
+  show heading.where(level: 3): it => block(above: 1.3em, below: 0.45em, sticky: true)[
+    #text(size: 11pt)[#it.body]
+  ]
+  show heading.where(level: 4): it => block(above: 1.1em, below: 0.4em, sticky: true)[
+    #text(font: font-body, size: 10.75pt, weight: 600)[#it.body]
+  ]
+  show heading.where(level: 1, outlined: false): it => block(above: 0.5em, below: 0.85em)[
+    #text(font: font-heading, size: 24pt, weight: weight-heading)[#it.body]
   ]
 
   show link: set text(fill: accent)
@@ -142,23 +164,41 @@
   show bibliography: set text(size: 9.25pt)
 
   // Page one identity is real document content so the site remains clickable.
-  align(right)[
-    #link(brand-site-url)[
-      #text(font: font-mono, size: 8pt, weight: 600)[#brand-site-label]
-    ]
-  ]
+  context {
+    let matches = query(<paperkit-document-type>)
+    let document-type = if matches.len() > 0 { matches.first().value } else { none }
+    grid(
+      columns: (1fr, auto),
+      column-gutter: 12pt,
+      if document-type != none {
+        accent-label(size: 7.75pt)[#document-type]
+      },
+      link(brand-site-url)[
+        #text(font: font-mono, size: 8pt, weight: 600)[#brand-site-label]
+      ],
+    )
+  }
 
   if title != none {
-    heading(level: 1, title)
+    [#heading(level: 1, outlined: false, title) <paperkit-title>]
   }
   if subtitle != none {
     block(above: -0.2em, below: 0.7em)[
       #text(size: 11.5pt, fill: muted)[#subtitle]
     ]
   }
+  let visible-date = context {
+    let matches = query(<paperkit-authored-date>)
+    let authored-date = if matches.len() > 0 { matches.first().value } else { none }
+    if authored-date != none {
+      authored-date.display("[day padding:none] [month repr:long] [year]")
+    } else {
+      date
+    }
+  }
   if date != none {
     block(below: 1.2em)[
-      #text(font: font-mono, size: 8pt, fill: muted)[#date]
+      #text(font: font-mono, size: 8pt, fill: muted)[#visible-date]
     ]
   }
 
@@ -166,16 +206,16 @@
     block(
       width: 100%,
       breakable: true,
-      stroke: 0.5pt + rule-light,
-      inset: (x: 11pt, y: 10pt),
-      above: 0.3em,
-      below: 0.65em,
+      stroke: (top: 0.5pt + rule-light),
+      inset: (top: 9pt),
+      above: 0.35em,
+      below: 0.7em,
     )[
       #accent-label(size: 7.75pt)[
         #if abstract-title != none { abstract-title } else { [Abstract] }
       ]
       #v(0.45em)
-      #set text(size: 9.25pt, fill: ink)
+      #set text(size: 9.75pt, fill: ink)
       #set par(leading: 0.6em, spacing: 0.7em)
       #abstract
     ]
@@ -190,7 +230,7 @@
         #h(0.65em)
         #(
           values
-            .map(keyword => text(size: 8.25pt, fill: muted, keyword))
+            .map(keyword => text(size: 8.75pt, fill: muted, keyword))
             .join([ · ])
         )
       ]
