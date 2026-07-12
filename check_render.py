@@ -85,11 +85,18 @@ def embedded_fonts(reader: PdfReader) -> dict[str, bool]:
     return fonts_by_name
 
 
-def document_metadata(reader: PdfReader) -> dict[str, str]:
+def document_metadata(reader: PdfReader) -> dict[str, str | list[str]]:
     metadata = reader.metadata or {}
+    keywords = [
+        value.strip()
+        for value in str(metadata.get("/Keywords", "")).split(",")
+        if value.strip()
+    ]
     return {
-        "title": str(metadata.get("/Title") or ""),
-        "author": str(metadata.get("/Author") or ""),
+        "title": str(metadata.get("/Title", "")),
+        "author": str(metadata.get("/Author", "")),
+        "subject": str(metadata.get("/Subject", "")),
+        "keywords": keywords,
     }
 
 
@@ -149,7 +156,7 @@ def validation_failures(
     fonts: dict[str, bool],
     link_count: int,
     uris: list[str],
-    metadata: dict[str, str],
+    metadata: dict[str, str | list[str]],
     tagged: bool,
     alt_texts: list[str],
 ) -> list[str]:
@@ -216,6 +223,14 @@ def validation_failures(
             and metadata["author"] != requirements.require_author):
         fails.append(f"PDF author: {metadata['author']!r} "
                      f"!= {requirements.require_author!r}")
+    if (requirements.require_subject is not None
+            and metadata["subject"] != requirements.require_subject):
+        fails.append(
+            f"PDF subject {metadata['subject']!r} != {requirements.require_subject!r}"
+        )
+    for keyword in requirements.require_keyword:
+        if keyword not in metadata["keywords"]:
+            fails.append(f"required PDF keyword missing: {keyword!r}")
 
     if not tagged:
         fails.append("PDF is not tagged (/StructTreeRoot and /MarkInfo /Marked required)")
@@ -244,6 +259,8 @@ def main() -> int:
                     help="exact required PDF /Title metadata")
     ap.add_argument("--require-author",
                     help="exact required PDF /Author metadata")
+    ap.add_argument("--require-subject")
+    ap.add_argument("--require-keyword", action="append", default=[])
     ap.add_argument("--require-alt", action="append", default=[],
                     help="substring required in tagged structure alt text (repeatable)")
     # default=None, not a list: argparse appends user values TO a list default

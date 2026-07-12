@@ -85,15 +85,19 @@ class CheckRenderTests(unittest.TestCase):
             ["Calibration error by review cadence"],
         )
 
-    def test_document_metadata_normalizes_title_and_author(self):
+    def test_document_metadata_normalizes_editorial_fields(self):
         reader = SimpleNamespace(metadata={
             "/Title": "Intermittent Evaluation",
             "/Author": "Joshua Iokua",
+            "/Subject": "A concise description.",
+            "/Keywords": "research operations, calibration",
         })
 
         self.assertEqual(check_render.document_metadata(reader), {
             "title": "Intermittent Evaluation",
             "author": "Joshua Iokua",
+            "subject": "A concise description.",
+            "keywords": ["research operations", "calibration"],
         })
 
     def test_parse_count_requirement_splits_on_last_equals(self):
@@ -117,6 +121,8 @@ class CheckRenderTests(unittest.TestCase):
                 "require_uri_once": [],
                 "require_title": None,
                 "require_author": None,
+                "require_subject": None,
+                "require_keyword": [],
                 "require_alt": [],
             }
             values.update(overrides)
@@ -128,7 +134,12 @@ class CheckRenderTests(unittest.TestCase):
             "fonts": {"AAAAAA+Geist-Regular": True, "BBBBBB+Literata": True},
             "link_count": 2,
             "uris": ["https://jiokua.dev"],
-            "metadata": {"title": "Paper title", "author": "Joshua Iokua"},
+            "metadata": {
+                "title": "Paper title",
+                "author": "Joshua Iokua",
+                "subject": "Paper subject",
+                "keywords": ["research operations"],
+            },
             "tagged": True,
             "alt_texts": ["Calibration chart"],
         }
@@ -144,6 +155,18 @@ class CheckRenderTests(unittest.TestCase):
                 requirements(require_author="Expected Author"),
                 {},
                 "PDF author",
+            ),
+            (
+                "wrong subject",
+                requirements(require_subject="Expected description"),
+                {},
+                "PDF subject",
+            ),
+            (
+                "missing keyword",
+                requirements(require_keyword=["missing keyword"]),
+                {},
+                "PDF keyword",
             ),
             (
                 "missing tags",
