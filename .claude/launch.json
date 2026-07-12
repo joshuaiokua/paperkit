@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "research-paper-preview",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["sample/preview-research-paper.sh"],
+      "port": 8765
+    }
+  ]
+}
