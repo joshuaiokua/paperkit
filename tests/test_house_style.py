@@ -86,6 +86,19 @@ class HouseStyleTests(unittest.TestCase):
         ):
             self.assertIn(contract, source)
 
+    def test_link_rules_preserve_link_elements_for_pdf_annotations(self):
+        source = HOUSE.read_text()
+        match = re.search(
+            r"show link: it => \{(?P<rule>.*?)\n  \}\n  show raw:",
+            source,
+            re.DOTALL,
+        )
+
+        self.assertIsNotNone(match, "missing the link show rule")
+        rule = match.group("rule")
+        self.assertNotIn("it.body", rule)
+        self.assertEqual(rule.count("text(fill: accent, it)"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
