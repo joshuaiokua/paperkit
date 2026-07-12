@@ -57,6 +57,46 @@ class RefsFilterTests(unittest.TestCase):
             typst,
         )
 
+    def test_invalid_calendar_dates_remain_plain_legacy_text(self):
+        for date in ("2026-02-30", "2026-13-01", "2025-02-29", "0000-01-01"):
+            with self.subTest(date=date):
+                typst = render_typst(f"""
+                    ---
+                    title: Invalid date fixture
+                    date: {date}
+                    ---
+
+                    ## Body
+                """)
+                self.assertNotIn("<paperkit-authored-date>", typst)
+                self.assertIn(date, typst)
+
+        leap_day = render_typst("""
+            ---
+            title: Leap day fixture
+            date: 2024-02-29
+            ---
+
+            ## Body
+        """)
+        self.assertIn(
+            '#metadata(datetime(year: 2024, month: 2, day: 29)) <paperkit-authored-date>',
+            leap_day,
+        )
+
+    def test_long_title_uses_a_bounded_running_header_fallback(self):
+        typst = render_typst("""
+            ---
+            title: A deliberately overlong document title that cannot safely fit within one line of fixed running-header furniture
+            ---
+
+            ## Body
+        """)
+        self.assertIn(
+            '#metadata("Research paper") <paperkit-running-title>',
+            typst,
+        )
+
     def test_preserves_caption_but_overrides_image_alt_and_adds_layers(self):
         typst = render_typst("""
             ![**Finding.** Explanation.](plot.svg){fig-alt="Bar chart showing the finding" fig-note="Intervals are 95%." fig-source="Simulation."}

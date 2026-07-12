@@ -56,6 +56,19 @@ class HouseStyleTests(unittest.TestCase):
         self.assertIn("stroke: (top: 0.5pt + rule-light)", abstract)
         self.assertNotIn("stroke: 0.5pt + rule-light,", abstract)
 
+    def test_running_header_has_a_bounded_generic_fallback(self):
+        source = HOUSE.read_text()
+        header = re.search(
+            r"header: context \{(?P<rule>.*?)\n    \},\n    footer:",
+            source,
+            re.DOTALL,
+        )
+
+        self.assertIsNotNone(header, "missing the page header context")
+        rule = header.group("rule")
+        self.assertNotIn("else if title != none", rule)
+        self.assertIn('else {\n          "Research paper"\n        }', rule)
+
     def test_document_metadata_uses_all_editorial_fields(self):
         source = HOUSE.read_text()
         for contract in ("description:", "keywords:", "date:"):
@@ -97,8 +110,11 @@ class HouseStyleTests(unittest.TestCase):
         self.assertIsNotNone(match, "missing the link show rule")
         rule = match.group("rule")
         self.assertNotIn("it.body", rule)
-        self.assertIn("set text(fill: accent)", rule)
-        self.assertIn("underline(stroke: 0.35pt + accent, offset: 2pt, it)", rule)
+        self.assertRegex(
+            rule,
+            r"if type\(it\.dest\) == str \{\s+set text\(fill: accent\)\s+underline\(stroke: 0\.35pt \+ accent, offset: 2pt, it\)",
+        )
+        self.assertFalse(rule.lstrip().startswith("set text(fill: accent)"))
         self.assertRegex(rule, r"else \{\s+it\s+\}")
 
 

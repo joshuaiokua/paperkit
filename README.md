@@ -21,7 +21,7 @@ quiet Jiokua visual register.
 ## The paper register
 
 The default output is US Letter, one column, near-white paper, and about 1.25in
-side margins. Body copy is ragged-right 10.5pt Geist; titles and headings use
+side margins. Body copy is ragged-right 10.75pt Geist; titles and headings use
 Literata; metadata, measures, section labels, and page furniture use Geist Mono.
 
 The visible hierarchy is intentionally restrained:
@@ -31,10 +31,10 @@ The visible hierarchy is intentionally restrained:
 - transparent, square-cornered research-note/abstract block with a neutral
   hairline;
 - inline keywords;
-- readable tables with captions above, no vertical rules, tabular mono values,
-  and an accent-mist header row;
+- readable tables with captions above, no vertical rules or header wash,
+  semantic header weight, and tabular mono values;
 - full-measure figures with left-aligned captions below;
-- page-number-only footer.
+- quiet later-page running titles and site labels, plus centered page numbers.
 
 See [FIGURE_STYLE.md](FIGURE_STYLE.md) for the graph grammar and producer
 handoff contract.
@@ -142,7 +142,7 @@ Run the same end-to-end contract as CI:
 
 It verifies vendored font checksums, renders the legacy compatibility sample,
 renders the research specimen, inspects PDF metadata and structure, asserts the
-running-header/link contract, compiles the standalone Typst source to three PNG
+running-header/link contract, compiles the standalone Typst source to four PNG
 pages at 144 PPI, and compares them against `sample/goldens/MANIFEST.sha256`.
 Visual changes therefore require an intentional render, page-by-page review,
 and golden update.

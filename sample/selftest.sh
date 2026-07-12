@@ -15,6 +15,9 @@ RESEARCH_TYP="$KIT/sample/.research-paper.generated.typ"
 TYPST_BIN="${TYPST:-$KIT/bin/typst}"
 VISUAL_DIR="$(mktemp -d "${TMPDIR:-/tmp}/paperkit-visual.XXXXXX")"
 RICH_TITLE_MD="$VISUAL_DIR/rich-title.md"
+LONG_TITLE_MD="$VISUAL_DIR/long-title.md"
+LONG_TITLE="A deliberately overlong document title that cannot safely fit within one line of fixed running-header furniture"
+INVALID_DATE_MD="$VISUAL_DIR/invalid-date.md"
 cleanup() {
   rm -f "$RESEARCH_TYP"
   rm -rf "$VISUAL_DIR"
@@ -70,6 +73,46 @@ printf '%s\n' \
   --require-title "Linked title" \
   --require-author "Joshua Iokua" \
   --require-uri-once "https://example.com" \
+  --require-font Geist --require-font Literata
+
+printf '%s\n' \
+  "# $LONG_TITLE" \
+  '' \
+  'The visible title remains complete on page one.' \
+  '' \
+  '```{=typst}' \
+  '#pagebreak()' \
+  '```' \
+  '' \
+  'The second-page header uses the bounded generic fallback.' \
+  > "$LONG_TITLE_MD"
+
+"$KIT/render.sh" "$LONG_TITLE_MD"
+
+"${PY[@]}" "$KIT/check_render.py" "${LONG_TITLE_MD%.md}.pdf" \
+  --min-pages 2 \
+  --sentinel-count "$LONG_TITLE=1" \
+  --sentinel-count "Research paper=1" \
+  --require-title "$LONG_TITLE" \
+  --require-author "Joshua Iokua" \
+  --require-font Geist --require-font Literata
+
+printf '%s\n' \
+  '---' \
+  'title: Invalid calendar date fixture' \
+  'date: 2026-02-30' \
+  '---' \
+  '' \
+  'An ISO-shaped invalid date remains ordinary visible text.' \
+  > "$INVALID_DATE_MD"
+
+"$KIT/render.sh" "$INVALID_DATE_MD"
+
+"${PY[@]}" "$KIT/check_render.py" "${INVALID_DATE_MD%.md}.pdf" \
+  --min-pages 1 \
+  --sentinel "2026-02-30" \
+  --require-title "Invalid calendar date fixture" \
+  --require-author "Joshua Iokua" \
   --require-font Geist --require-font Literata
 
 PAPERKIT_TYPST_OUT="$RESEARCH_TYP" \

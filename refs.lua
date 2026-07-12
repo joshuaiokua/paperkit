@@ -16,6 +16,8 @@
 -- If a [N] has no matching bibliography anchor, typst fails the render loudly
 -- (unknown label) — that is a feature: a dangling reference is a report bug.
 
+local MAX_RUNNING_TITLE_BYTES = 64
+
 -- Runs after the element filters: promote a lone leading H1 to the document
 -- title when the source has no front-matter title. The markdown keeps its H1
 -- for GitHub; the PDF gets real /Title metadata (house.typ's conf feeds it to
@@ -48,9 +50,19 @@ local function iso_date_expression(meta)
   if value == nil then return nil end
   local year, month, day = value:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)$")
   if year == nil then return nil end
+  local year_number = tonumber(year)
+  local month_number = tonumber(month)
+  local day_number = tonumber(day)
+  local month_lengths = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+  if year_number < 1 then return nil end
+  if month_number < 1 or month_number > 12 then return nil end
+  if year_number % 400 == 0 or (year_number % 4 == 0 and year_number % 100 ~= 0) then
+    month_lengths[2] = 29
+  end
+  if day_number < 1 or day_number > month_lengths[month_number] then return nil end
   return string.format(
     "datetime(year: %d, month: %d, day: %d)",
-    tonumber(year), tonumber(month), tonumber(day)
+    year_number, month_number, day_number
   )
 end
 
@@ -66,7 +78,15 @@ function Pandoc(doc)
   end
 
   -- Flatten rich title content so running furniture stays plain and unlinked.
-  local running_title = doc.meta["running-title"] or doc.meta.title
+  local running_title = doc.meta["running-title"]
+  if running_title == nil and doc.meta.title ~= nil then
+    local title_text = meta_text(doc.meta.title)
+    if title_text ~= nil and #title_text <= MAX_RUNNING_TITLE_BYTES then
+      running_title = doc.meta.title
+    else
+      running_title = "Research paper"
+    end
+  end
   if running_title ~= nil then
     insert_typst_metadata(
       doc,

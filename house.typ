@@ -53,8 +53,6 @@
         let matches = query(<paperkit-running-title>)
         let running-title = if matches.len() > 0 {
           matches.first().value
-        } else if title != none {
-          title
         } else {
           "Research paper"
         }
@@ -137,8 +135,8 @@
   ]
 
   show link: it => {
-    set text(fill: accent)
     if type(it.dest) == str {
+      set text(fill: accent)
       underline(stroke: 0.35pt + accent, offset: 2pt, it)
     } else {
       it
