@@ -137,12 +137,11 @@
   ]
 
   show link: it => {
+    set text(fill: accent)
     if type(it.dest) == str {
-      underline(stroke: 0.35pt + accent, offset: 2pt)[
-        #text(fill: accent, it)
-      ]
+      underline(stroke: 0.35pt + accent, offset: 2pt, it)
     } else {
-      text(fill: accent, it)
+      it
     }
   }
   show raw: set text(font: font-mono)

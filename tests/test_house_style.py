@@ -97,7 +97,9 @@ class HouseStyleTests(unittest.TestCase):
         self.assertIsNotNone(match, "missing the link show rule")
         rule = match.group("rule")
         self.assertNotIn("it.body", rule)
-        self.assertEqual(rule.count("text(fill: accent, it)"), 2)
+        self.assertIn("set text(fill: accent)", rule)
+        self.assertIn("underline(stroke: 0.35pt + accent, offset: 2pt, it)", rule)
+        self.assertRegex(rule, r"else \{\s+it\s+\}")
 
 
 if __name__ == "__main__":
