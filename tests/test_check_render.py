@@ -100,6 +100,21 @@ class CheckRenderTests(unittest.TestCase):
             "keywords": ["research operations", "calibration"],
         })
 
+    def test_document_metadata_normalizes_null_editorial_fields(self):
+        reader = SimpleNamespace(metadata={
+            "/Title": None,
+            "/Author": None,
+            "/Subject": None,
+            "/Keywords": None,
+        })
+
+        self.assertEqual(check_render.document_metadata(reader), {
+            "title": "",
+            "author": "",
+            "subject": "",
+            "keywords": [],
+        })
+
     def test_parse_count_requirement_splits_on_last_equals(self):
         self.assertEqual(
             check_render.parse_count_requirement("effect = evidence=2"),

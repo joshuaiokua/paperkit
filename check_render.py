@@ -89,13 +89,13 @@ def document_metadata(reader: PdfReader) -> dict[str, str | list[str]]:
     metadata = reader.metadata or {}
     keywords = [
         value.strip()
-        for value in str(metadata.get("/Keywords", "")).split(",")
+        for value in str(metadata.get("/Keywords") or "").split(",")
         if value.strip()
     ]
     return {
-        "title": str(metadata.get("/Title", "")),
-        "author": str(metadata.get("/Author", "")),
-        "subject": str(metadata.get("/Subject", "")),
+        "title": str(metadata.get("/Title") or ""),
+        "author": str(metadata.get("/Author") or ""),
+        "subject": str(metadata.get("/Subject") or ""),
         "keywords": keywords,
     }
 
