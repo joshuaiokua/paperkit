@@ -123,45 +123,83 @@
     #text(font: font-heading, size: 24pt, weight: weight-heading)[#it.body]
   ]
 
-  show link: set text(fill: accent)
+  set list(indent: 0.25em, body-indent: 0.55em, spacing: 0.35em)
+  set enum(indent: 0.25em, body-indent: 0.65em, spacing: 0.35em)
+
+  show quote: it => block(
+    inset: (left: 12pt),
+    stroke: (left: 1pt + rule-strong),
+    above: 0.75em,
+    below: 0.75em,
+  )[
+    #set text(size: 10pt, fill: muted)
+    #it
+  ]
+
+  show link: it => {
+    if type(it.dest) == str {
+      underline(stroke: 0.35pt + accent, offset: 2pt)[
+        #text(fill: accent)[#it.body]
+      ]
+    } else {
+      text(fill: accent, it.body)
+    }
+  }
   show raw: set text(font: font-mono)
   show raw.where(block: true): it => block(
     width: 100%,
     fill: surface-quiet,
+    stroke: 0.5pt + rule-light,
     inset: (x: 9pt, y: 7pt),
+    above: 0.6em,
+    below: 0.8em,
     it,
   )
 
-  set table(
-    inset: (x: 7pt, y: 5pt),
-    stroke: none,
-    fill: (_, y) => if y == 0 { accent-mist },
+  set footnote.entry(
+    separator: line(length: 30%, stroke: 0.5pt + rule-light),
+    clearance: 0.8em,
+    gap: 0.4em,
+    indent: 1em,
   )
-  show table.cell.where(y: 0): it => {
-    set text(weight: 600, fill: ink)
-    it
-  }
+  show footnote.entry: set text(size: 8.5pt, fill: muted)
+
+  set table(inset: (x: 7pt, y: 5pt), stroke: none)
+  show table.cell.where(y: 0): set text(weight: 600, fill: ink)
   show table: it => {
-    set text(size: 9pt)
+    set text(size: 9.75pt)
     show regex("[0-9]+[.][0-9]+|[0-9]+"): set text(font: font-mono)
-    show strong: set text(font: font-mono, weight: 600, fill: accent)
+    show strong: set text(fill: ink)
     it
   }
+  show <paperkit-focal-value>: set text(font: font-mono, weight: 600, fill: accent)
+  show <paperkit-table-note>: it => block(above: 0.45em, below: 0.9em)[
+    #set text(size: 8.75pt, fill: muted)
+    #set par(leading: 0.55em, spacing: 0.35em)
+    #it
+  ]
 
   show image: set image(width: 100%)
-  show figure: set block(breakable: true)
   show figure.where(kind: image): set figure(numbering: "1", gap: 0.55em)
-  show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: image): set figure.caption(position: bottom)
+  show figure.where(kind: image): set block(breakable: false)
+  show figure.where(kind: table): set block(breakable: true)
+  show figure.where(kind: table): it => {
+    show align.where(alignment: center): aligned => align(left, aligned.body)
+    set figure.caption(position: top)
+    it
+  }
   show figure.caption: it => align(left, block(width: 100%, above: 0.35em)[
-      #accent-label[#it.supplement #context it.counter.display(it.numbering)]
-      #h(0.45em)
-      #text(size: 8.5pt, fill: muted)[#it.body]
-    ])
+    #set text(size: 9pt, fill: muted)
+    #show strong: set text(fill: ink, weight: 600)
+    #accent-label[#it.supplement #context it.counter.display(it.numbering)]
+    #h(0.45em)
+    #it.body
+  ])
 
   set bibliography(title: [References])
   show bibliography: set heading(offset: 1)
-  show bibliography: set text(size: 9.25pt)
+  show bibliography: set text(size: 9.75pt)
 
   // Page one identity is real document content so the site remains clickable.
   context {

@@ -61,6 +61,31 @@ class HouseStyleTests(unittest.TestCase):
         for contract in ("description:", "keywords:", "date:"):
             self.assertIn(contract, source)
 
+    def test_tables_and_figures_use_editorial_semantics(self):
+        source = HOUSE.read_text()
+        for contract in (
+            "show <paperkit-focal-value>",
+            "show <paperkit-table-note>",
+            "show align.where(alignment: center)",
+            "size: 9.75pt",
+            "breakable: false",
+            "show strong: set text(fill: ink)",
+        ):
+            self.assertIn(contract, source)
+        self.assertNotIn("fill: (_, y) => if y == 0 { accent-mist }", source)
+
+    def test_secondary_content_has_house_rules(self):
+        source = HOUSE.read_text()
+        for contract in (
+            "set list(",
+            "set enum(",
+            "show quote:",
+            "set footnote.entry(",
+            "show link: it =>",
+            "show bibliography: set text(size: 9.75pt)",
+        ):
+            self.assertIn(contract, source)
+
 
 if __name__ == "__main__":
     unittest.main()
