@@ -78,3 +78,19 @@ class RefsFilterTests(unittest.TestCase):
         """)
         self.assertIn('0.084<paperkit-focal-value>', typst)
         self.assertIn('<paperkit-table-note>', typst)
+
+    def test_preserves_authored_focal_value_anchor(self):
+        typst = render_typst("""
+            [0.084]{#milestone .focal-value}
+        """)
+        self.assertIn('<milestone>', typst)
+        self.assertIn('<paperkit-focal-value>', typst)
+
+    def test_preserves_authored_table_note_anchor(self):
+        typst = render_typst("""
+            ::: {#method-note .table-note}
+            **Note.** Lower is better.
+            :::
+        """)
+        self.assertIn('<method-note>', typst)
+        self.assertIn('<paperkit-table-note>', typst)

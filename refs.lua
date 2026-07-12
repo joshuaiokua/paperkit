@@ -111,7 +111,13 @@ end
 
 function Span(el)
   if el.classes:includes("focal-value") then
-    el.identifier = "paperkit-focal-value"
+    if el.identifier == "" then
+      el.identifier = "paperkit-focal-value"
+    else
+      el.content = pandoc.Inlines({
+        pandoc.Span(el.content, {id = "paperkit-focal-value"})
+      })
+    end
     el.classes = el.classes:filter(function(class)
       return class ~= "focal-value"
     end)
@@ -121,7 +127,13 @@ end
 
 function Div(el)
   if el.classes:includes("table-note") then
-    el.identifier = "paperkit-table-note"
+    if el.identifier == "" then
+      el.identifier = "paperkit-table-note"
+    else
+      el.content = pandoc.Blocks({
+        pandoc.Div(el.content, {id = "paperkit-table-note"})
+      })
+    end
     el.classes = el.classes:filter(function(class)
       return class ~= "table-note"
     end)
