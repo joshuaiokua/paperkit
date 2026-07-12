@@ -107,8 +107,8 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --sentinel "01 Introduction" \
   --sentinel "Retention under intermittent constraint" \
   --sentinel "References" \
-  --sentinel-count "Retention under intermittent constraint=2" \
-  --sentinel-count "jiokua.dev=3" \
+  --sentinel-count "Retention under intermittent constraint=3" \
+  --sentinel-count "jiokua.dev=4" \
   --forbid-text "Joshua Iokua" \
   --forbid-text "Bibliography" \
   --require-title "Intermittent Evaluation Preserves Calibration Under Sparse Feedback" \
@@ -129,7 +129,7 @@ verify_manifest "$KIT/sample/goldens"
   --ignore-system-fonts \
   --ppi=144
 
-test "$(find "$VISUAL_DIR" -name 'research-paper-*.png' | wc -l | tr -d ' ')" -eq 3
+test "$(find "$VISUAL_DIR" -name 'research-paper-*.png' | wc -l | tr -d ' ')" -eq 4
 verify_manifest "$VISUAL_DIR" "$KIT/sample/goldens/MANIFEST.sha256"
 
 if PAPERKIT_TYPST_OUT="$VISUAL_DIR/outside.typ" \
