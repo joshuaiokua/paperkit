@@ -78,7 +78,17 @@ PAPERKIT_TYPST_OUT="$RESEARCH_TYP" \
 test -s "$RESEARCH_TYP"
 grep -F '#metadata("Retention under intermittent constraint") <paperkit-running-title>' \
   "$RESEARCH_TYP"
+grep -F '#metadata("Research note") <paperkit-document-type>' \
+  "$RESEARCH_TYP"
+grep -F '#metadata(datetime(year: 2026, month: 7, day: 10)) <paperkit-authored-date>' \
+  "$RESEARCH_TYP"
+grep -F '#metadata("Teams often increase review frequency when evidence is scarce, assuming that more checkpoints necessarily improve judgment. This paper tests the opposite proposition: a deliberately intermittent review cadence can preserve calibration while reducing coordination cost. Across three simulated research conditions, scheduled evidence reviews retained decision quality and produced fewer reversals than continuous monitoring. The result is not a general case against observation; it is evidence for protecting the moment when observation becomes interpretation.") <paperkit-description>' \
+  "$RESEARCH_TYP"
 grep -F '#metadata(("research operations", "evidence quality", "calibration", "asynchronous review")) <paperkit-keywords>' \
+  "$RESEARCH_TYP"
+grep -F '0.084<paperkit-focal-value>' "$RESEARCH_TYP"
+grep -F '<paperkit-table-note>' "$RESEARCH_TYP"
+grep -F 'alt: "Horizontal bar chart showing lower calibration error for weekly and milestone review than continuous monitoring, with an underpowered subgroup labeled No estimate."' \
   "$RESEARCH_TYP"
 grep -F '@gelman2014' "$RESEARCH_TYP"
 grep -F '#bibliography(' "$RESEARCH_TYP"
@@ -88,6 +98,9 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --sentinel "Intermittent evaluation preserves calibration" \
   --sentinel "No estimate" \
   --sentinel "Research note" \
+  --sentinel "Abstract" \
+  --sentinel "Registered decision rule" \
+  --sentinel "Interpretation boundary" \
   --sentinel "Keywords" \
   --sentinel "research operations" \
   --sentinel "asynchronous review" \
@@ -100,8 +113,11 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --forbid-text "Bibliography" \
   --require-title "Intermittent Evaluation Preserves Calibration Under Sparse Feedback" \
   --require-author "Joshua Iokua" \
+  --require-subject "Teams often increase review frequency when evidence is scarce, assuming that more checkpoints necessarily improve judgment. This paper tests the opposite proposition: a deliberately intermittent review cadence can preserve calibration while reducing coordination cost. Across three simulated research conditions, scheduled evidence reviews retained decision quality and produced fewer reversals than continuous monitoring. The result is not a general case against observation; it is evidence for protecting the moment when observation becomes interpretation." \
+  --require-keyword "research operations" \
+  --require-keyword "calibration" \
   --require-uri-once "https://jiokua.dev" \
-  --require-alt "Calibration error relative to the continuous-monitoring condition" \
+  --require-alt "Horizontal bar chart showing lower calibration error for weekly and milestone review than continuous monitoring" \
   --require-font Geist --require-font Literata
 
 verify_manifest "$KIT/sample/goldens"

@@ -68,8 +68,9 @@ Use ordinary Pandoc Markdown with research metadata:
 title: Intermittent Evaluation Preserves Calibration
 subtitle: A field note on evidence quality and review cadence
 running-title: Retention under intermittent constraint
+document-type: Research note
 date: 2026-07-10
-abstract-title: Research note
+abstract-title: Abstract
 abstract: |
   A concise statement of the question, method, result, and boundary.
 keywords:
@@ -93,6 +94,13 @@ using the requested built-in style or CSL file. Do not add a Markdown
 `References` section. Legacy `[N]` markers and bullet-list references remain
 supported for existing documents, but they are compatibility behavior, not the
 new-paper default.
+
+Use explicit editorial attributes when a table or figure needs richer semantics:
+
+- `[value]{.focal-value}` marks one analytically focal table value.
+- `::: {.table-note}` groups a table's Note and Source paragraphs.
+- `fig-alt`, `fig-note`, and `fig-source` separate accessible image text from
+  the visible caption layers.
 
 Render and validate:
 

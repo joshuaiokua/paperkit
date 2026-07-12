@@ -2,8 +2,9 @@
 title: Intermittent Evaluation Preserves Calibration Under Sparse Feedback
 subtitle: A field note on evidence quality, review cadence, and durable research artifacts
 running-title: Retention under intermittent constraint
+document-type: Research note
 date: 2026-07-10
-abstract-title: Research note
+abstract-title: Abstract
 abstract: |
   Teams often increase review frequency when evidence is scarce, assuming that
   more checkpoints necessarily improve judgment. This paper tests the opposite
@@ -35,14 +36,17 @@ The relevant distinction is not between observing and ignoring. It is between da
 collection, which can remain continuous, and interpretive review, which can occur at
 pre-registered intervals. This separation follows a broader principle from research
 design: analysis choices made after observing outcomes require stronger justification
-than choices made in advance [@nosek2018].
+than choices made in advance [@nosek2018]. The [Center for Open Science
+preregistration guidance](https://www.cos.io/initiatives/prereg) provides a
+practical overview of declaring those choices before results are known.
 
 This specimen is intentionally demanding. It combines native citations, a compact
 table, a full-measure vector figure, inline notation such as Δ = −0.084,
 footnotes,[^scope] code, links, and enough prose to exercise later-page furniture.
 
 [^scope]: The simulation represents a workflow mechanism, not a claim about every
-    scientific or organizational setting.
+    scientific or organizational setting. Its purpose is to exercise editorial
+    mechanisms while keeping essential interpretation in the main text.
 
 ## Study design
 
@@ -63,6 +67,23 @@ review := collect continuously
           revise only against the registered decision rule
 ```
 
+### Registered decision rule
+
+The review protocol fixed three operational constraints:
+
+1. collect observations continuously;
+2. interpret them only at declared checkpoints;
+3. revise conclusions against the registered rule.
+
+- Invalid programs remain visible.
+  - Underpowered subgroups receive an explicit `No estimate` state.
+- Uncertainty remains attached to every estimated comparison.
+
+#### Interpretation boundary
+
+> A cadence is useful only when it matches the risk and reversibility of the
+> decision it governs.
+
 This framing matters because a chart is not merely an illustration. It is part of the
 evidence chain. The visual must distinguish estimated effects from unavailable effects,
 retain the zero baseline, and avoid decorative emphasis that implies certainty the model
@@ -79,16 +100,19 @@ system.
 |:---------------|------------------:|----------:|---------------:|
 | Continuous     | 0.142             | 5.8       | 31.4           |
 | Weekly         | 0.091             | 3.1       | 18.7           |
-| Milestone      | **0.084**         | 2.6       | 12.2           |
+| Milestone      | [0.084]{.focal-value} | 2.6       | 12.2           |
 
 : Registered outcomes by review cadence.
 
+::: {.table-note}
 **Note.** Lower calibration error and fewer reversals are better. Hours include
 interpretive review but exclude automated collection.
 
 **Source.** Paperkit research-operations simulation, 240 programs.
+:::
 
-![Calibration error relative to the continuous-monitoring condition. Weekly and milestone review are directly labeled; an underpowered subgroup is retained as a hatched No estimate state. Error bars show 95% confidence intervals. Source: Paperkit research-operations simulation.](figs/calibration.svg)
+![**Calibration error by review cadence.** Weekly and milestone review are
+directly labeled; the underpowered subgroup remains visible as a hatched state.](figs/calibration.svg){fig-alt="Horizontal bar chart showing lower calibration error for weekly and milestone review than continuous monitoring, with an underpowered subgroup labeled No estimate." fig-note="Error bars show 95% confidence intervals." fig-source="Paperkit research-operations simulation."}
 
 The milestone condition reduced calibration error without shifting the burden into later
 rework. Reviewers made fewer reversals and spent less time reconciling interpretations

@@ -69,12 +69,17 @@ series. Prefer ink plus direct labels for comparisons.
 ## Caption contract
 
 Paperkit places the caption below an image and renders the automatic `Figure N`
-label in blue Geist Mono. Write caption content in this order:
+label in blue Geist Mono. Author the rich caption contract directly in Markdown:
 
-1. concise descriptive title or finding;
-2. what is compared and how to read the encoding;
-3. `Note.` with uncertainty, exclusions, definitions, or analysis boundaries;
-4. `Source.` with the data or generating analysis.
+```markdown
+![**Calibration error by review cadence.** Weekly and milestone review are
+directly labeled; the underpowered subgroup remains visible as a hatched state.](figs/calibration.svg){fig-alt="Horizontal bar chart showing lower calibration error for weekly and milestone review than continuous monitoring, with an underpowered subgroup labeled No estimate." fig-note="Error bars show 95% confidence intervals." fig-source="Paperkit research-operations simulation."}
+```
+
+`fig-alt` supplies the accessible image text independently of the visible lead
+and explanation. `fig-note` and `fig-source` add the quieter caption layers.
+Legacy images without attributes remain supported and continue to use Pandoc's
+caption and alt-text behavior.
 
 Table captions appear above tables. Table notes and sources follow the table as
 separate paragraphs.
