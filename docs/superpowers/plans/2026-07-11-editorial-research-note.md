@@ -401,8 +401,13 @@ def test_opening_matter_has_reserved_masthead_and_open_abstract(self):
     self.assertIn("paperkit-document-type", source)
     self.assertIn("paperkit-authored-date", source)
     self.assertIn("paperkit-description", source)
-    self.assertIn("stroke: (top: 0.5pt + rule-light)", source)
-    self.assertNotIn("stroke: 0.5pt + rule-light", source)
+    abstract = re.search(
+        r"if abstract != none \{(?P<rule>.*?)\n  \}\n\n  context \{",
+        source,
+        re.DOTALL,
+    ).group("rule")
+    self.assertIn("stroke: (top: 0.5pt + rule-light)", abstract)
+    self.assertNotIn("stroke: 0.5pt + rule-light,", abstract)
 
 def test_document_metadata_uses_all_editorial_fields(self):
     source = HOUSE.read_text()
@@ -489,18 +494,15 @@ context {
 }
 ```
 
-Format parsed dates with English month names while falling back to the original visible `date` content:
+Format parsed dates with Typst's built-in English long-month formatter while
+falling back to the original visible `date` content:
 
 ```typst
-let month-names = (
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-)
 let visible-date = context {
   let matches = query(<paperkit-authored-date>)
   let authored-date = if matches.len() > 0 { matches.first().value } else { none }
   if authored-date != none {
-    str(authored-date.day()) + " " + month-names.at(authored-date.month() - 1) + " " + str(authored-date.year())
+    authored-date.display("[day padding:none] [month repr:long] [year]")
   } else {
     date
   }
