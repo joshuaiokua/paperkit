@@ -79,6 +79,14 @@ export function normalizeSelection(value, manifest) {
   return normalized;
 }
 
+function normalizeStandaloneSelection(value) {
+  return normalizeSelection(value, {
+    schemaVersion: 1,
+    pdfSha256: value?.pdf,
+    pageCount: value?.page,
+  });
+}
+
 export function parseSelectionHash(hash, manifest) {
   if (typeof hash !== "string" || hash === "" || hash === "#") return null;
   const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
@@ -110,12 +118,7 @@ export function parseSelectionHash(hash, manifest) {
 }
 
 export function serializeSelection(value) {
-  const manifest = {
-    schemaVersion: 1,
-    pdfSha256: value?.pdf,
-    pageCount: value?.page,
-  };
-  const selection = normalizeSelection(value, manifest);
+  const selection = normalizeStandaloneSelection(value);
   if (!selection) throw new TypeError("Invalid preview selection");
   const params = new URLSearchParams();
   params.set("v", "1");
@@ -173,12 +176,7 @@ export function selectionFromDrag({
 }
 
 export function selectionDataset(value) {
-  const manifest = {
-    schemaVersion: 1,
-    pdfSha256: value?.pdf,
-    pageCount: value?.page,
-  };
-  const selection = normalizeSelection(value, manifest);
+  const selection = normalizeStandaloneSelection(value);
   if (!selection) throw new TypeError("Invalid preview selection");
   return {
     v: String(selection.v),

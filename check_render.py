@@ -215,19 +215,13 @@ def validation_failures(
         if actual_count != 1:
             fails.append(f"URI annotations for {required_uri!r}: {actual_count} != 1")
 
-    if (requirements.require_title is not None
-            and metadata["title"] != requirements.require_title):
-        fails.append(f"PDF title: {metadata['title']!r} "
-                     f"!= {requirements.require_title!r}")
-    if (requirements.require_author is not None
-            and metadata["author"] != requirements.require_author):
-        fails.append(f"PDF author: {metadata['author']!r} "
-                     f"!= {requirements.require_author!r}")
-    if (requirements.require_subject is not None
-            and metadata["subject"] != requirements.require_subject):
-        fails.append(
-            f"PDF subject {metadata['subject']!r} != {requirements.require_subject!r}"
-        )
+    for required, field, label in (
+        (requirements.require_title, "title", "PDF title:"),
+        (requirements.require_author, "author", "PDF author:"),
+        (requirements.require_subject, "subject", "PDF subject"),
+    ):
+        if required is not None and metadata[field] != required:
+            fails.append(f"{label} {metadata[field]!r} != {required!r}")
     for keyword in requirements.require_keyword:
         if keyword not in metadata["keywords"]:
             fails.append(f"required PDF keyword missing: {keyword!r}")
