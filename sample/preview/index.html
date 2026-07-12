@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Paperkit research paper preview</title>
+    <link rel="stylesheet" href="./preview.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Research paper preview</h1>
+        <p id="document-status" class="document-status" aria-live="polite">
+          Loading the generated PDF…
+        </p>
+      </div>
+      <a
+        id="pdf-link"
+        class="pdf-link"
+        aria-disabled="true"
+        target="_blank"
+        rel="noreferrer"
+      >Open exact PDF</a>
+    </header>
+
+    <main id="preview" class="preview-shell">
+      <section id="pages" class="pages" aria-label="Rendered PDF pages">
+        <div class="empty-state">Waiting for the first rendered generation…</div>
+      </section>
+
+      <aside class="companion" aria-labelledby="companion-title">
+        <div class="companion-heading">
+          <h2 id="companion-title">Region companion</h2>
+          <span id="refresh-status" class="refresh-status" data-state="refreshing">
+            Starting
+          </span>
+        </div>
+
+        <dl class="generation-details">
+          <div>
+            <dt>PDF</dt>
+            <dd id="pdf-hash">—</dd>
+          </div>
+          <div>
+            <dt>Pages</dt>
+            <dd id="page-count">—</dd>
+          </div>
+          <div>
+            <dt>Region</dt>
+            <dd id="region-summary">No region selected</dd>
+          </div>
+        </dl>
+
+        <textarea
+          id="selection-json"
+          class="selection-json"
+          aria-label="Selected region JSON"
+          readonly
+        >No region selected.</textarea>
+
+        <div class="companion-actions">
+          <button id="copy-selection" type="button" disabled>Copy Region</button>
+          <button id="clear-selection" class="secondary" type="button" disabled>
+            Clear
+          </button>
+        </div>
+
+        <p id="copy-status" class="copy-status" aria-live="polite"></p>
+
+        <p class="companion-help">
+          Drag across a page with a mouse or pen. Press Escape to clear.
+        </p>
+      </aside>
+    </main>
+
+    <noscript>This preview requires JavaScript for refreshes and region selection.</noscript>
+    <script type="module" src="./preview.mjs"></script>
+  </body>
+</html>
