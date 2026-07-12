@@ -29,6 +29,31 @@ local function typst_string(value)
   return '"' .. escaped .. '"'
 end
 
+local function insert_typst_metadata(doc, expression, label)
+  table.insert(doc.blocks, 1, pandoc.RawBlock(
+    "typst",
+    "#metadata(" .. expression .. ") <" .. label .. ">"
+  ))
+end
+
+local function meta_text(meta)
+  if meta == nil then return nil end
+  local value = pandoc.utils.stringify(meta)
+  if value == "" then return nil end
+  return value
+end
+
+local function iso_date_expression(meta)
+  local value = meta_text(meta)
+  if value == nil then return nil end
+  local year, month, day = value:match("^(%d%d%d%d)%-(%d%d)%-(%d%d)$")
+  if year == nil then return nil end
+  return string.format(
+    "datetime(year: %d, month: %d, day: %d)",
+    tonumber(year), tonumber(month), tonumber(day)
+  )
+end
+
 function Pandoc(doc)
   if doc.meta.title == nil then
     for i, b in ipairs(doc.blocks) do
@@ -43,10 +68,26 @@ function Pandoc(doc)
   -- Flatten rich title content so running furniture stays plain and unlinked.
   local running_title = doc.meta["running-title"] or doc.meta.title
   if running_title ~= nil then
-    table.insert(doc.blocks, 1, pandoc.RawBlock(
-      "typst",
-      "#metadata(" .. typst_string(running_title) .. ") <paperkit-running-title>"
-    ))
+    insert_typst_metadata(
+      doc,
+      typst_string(running_title),
+      "paperkit-running-title"
+    )
+  end
+
+  local document_type = meta_text(doc.meta["document-type"])
+  if document_type ~= nil then
+    insert_typst_metadata(doc, typst_string(document_type), "paperkit-document-type")
+  end
+
+  local authored_date = iso_date_expression(doc.meta.date)
+  if authored_date ~= nil then
+    insert_typst_metadata(doc, authored_date, "paperkit-authored-date")
+  end
+
+  local description = meta_text(doc.meta.abstract)
+  if description ~= nil then
+    insert_typst_metadata(doc, typst_string(description), "paperkit-description")
   end
 
   -- Pandoc 3.10 emits multiword native keywords as invalid Typst arguments
@@ -58,13 +99,63 @@ function Pandoc(doc)
     end
     doc.meta.keywords = nil
     if #keywords > 0 then
-      table.insert(doc.blocks, 1, pandoc.RawBlock(
-        "typst",
-        "#metadata((" .. table.concat(keywords, ", ") .. ")) <paperkit-keywords>"
-      ))
+      insert_typst_metadata(
+        doc,
+        "(" .. table.concat(keywords, ", ") .. ")",
+        "paperkit-keywords"
+      )
     end
   end
   return doc
+end
+
+function Span(el)
+  if el.classes:includes("focal-value") then
+    el.identifier = "paperkit-focal-value"
+    el.classes = el.classes:filter(function(class)
+      return class ~= "focal-value"
+    end)
+  end
+  return el
+end
+
+function Div(el)
+  if el.classes:includes("table-note") then
+    el.identifier = "paperkit-table-note"
+    el.classes = el.classes:filter(function(class)
+      return class ~= "table-note"
+    end)
+  end
+  return el
+end
+
+function Figure(el)
+  local block = el.content[1]
+  local image = block and block.content and block.content[1]
+  if image == nil or image.t ~= "Image" then return nil end
+
+  local explicit_alt = image.attributes["fig-alt"]
+  if explicit_alt ~= nil and explicit_alt ~= "" then
+    image.caption = pandoc.Inlines({pandoc.Str(explicit_alt)})
+  end
+
+  local caption = el.caption.long[1]
+  for _, layer in ipairs({
+    {label = "Note.", value = image.attributes["fig-note"]},
+    {label = "Source.", value = image.attributes["fig-source"]},
+  }) do
+    if layer.value ~= nil and layer.value ~= "" and caption ~= nil then
+      caption.content:insert(pandoc.LineBreak())
+      caption.content:insert(pandoc.Strong({pandoc.Str(layer.label)}))
+      caption.content:insert(pandoc.Space())
+      caption.content:insert(pandoc.Str(layer.value))
+    end
+  end
+
+  image.attributes["fig-alt"] = nil
+  image.attributes["fig-note"] = nil
+  image.attributes["fig-source"] = nil
+  return el
 end
 
 local function leading_ref(inl)

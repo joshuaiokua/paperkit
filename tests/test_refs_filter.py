@@ -1,0 +1,80 @@
+from pathlib import Path
+import subprocess
+import tempfile
+import textwrap
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def render_typst(markdown: str) -> str:
+    with tempfile.TemporaryDirectory() as tmp:
+        source = Path(tmp) / "fixture.md"
+        source.write_text(textwrap.dedent(markdown))
+        result = subprocess.run(
+            [
+                "pandoc",
+                str(source),
+                "-f",
+                "markdown+autolink_bare_uris",
+                "--lua-filter",
+                str(ROOT / "refs.lua"),
+                "-t",
+                "typst",
+                "--standalone",
+                "-V",
+                f"template={ROOT / 'house.typ'}",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout
+
+
+class RefsFilterTests(unittest.TestCase):
+    def test_transports_editorial_metadata(self):
+        typst = render_typst("""
+            ---
+            title: Metadata fixture
+            document-type: Research note
+            date: 2026-07-10
+            abstract: A concise description.
+            keywords: [research operations, calibration]
+            ---
+
+            ## Body
+        """)
+        self.assertIn('#metadata("Research note") <paperkit-document-type>', typst)
+        self.assertIn(
+            '#metadata(datetime(year: 2026, month: 7, day: 10)) <paperkit-authored-date>',
+            typst,
+        )
+        self.assertIn('#metadata("A concise description.") <paperkit-description>', typst)
+        self.assertIn(
+            '#metadata(("research operations", "calibration")) <paperkit-keywords>',
+            typst,
+        )
+
+    def test_preserves_caption_but_overrides_image_alt_and_adds_layers(self):
+        typst = render_typst("""
+            ![**Finding.** Explanation.](plot.svg){fig-alt="Bar chart showing the finding" fig-note="Intervals are 95%." fig-source="Simulation."}
+        """)
+        self.assertIn('alt: "Bar chart showing the finding"', typst)
+        self.assertIn('#strong[Finding.] Explanation.', typst)
+        self.assertIn('#strong[Note.] Intervals are 95%.', typst)
+        self.assertIn('#strong[Source.] Simulation.', typst)
+
+    def test_maps_explicit_focal_value_and_table_note_classes(self):
+        typst = render_typst("""
+            | Condition | Value |
+            |:--|--:|
+            | Milestone | [0.084]{.focal-value} |
+
+            ::: {.table-note}
+            **Note.** Lower is better.
+            :::
+        """)
+        self.assertIn('0.084<paperkit-focal-value>', typst)
+        self.assertIn('<paperkit-table-note>', typst)
