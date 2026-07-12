@@ -28,8 +28,8 @@ loudly before any consumer repo ever sees the breakage [1].
 Markdown stays the source of truth — readable in the repo, rendered by GitHub — and
 typst owns presentation. Pandoc bridges the two, with `refs.lua` doing the
 document-shape work at the AST layer [2]. With no explicit `running-title`, the
-later-page header falls back to this document's promoted title and pairs it with
-the unlinked `jiokua.dev` brand label.
+running header on every page falls back to this document's promoted title and
+pairs it with the page folio; the `jiokua.dev` brand label sits in the footer.
 
 ![Every stage of the render pipeline is pinned by exact version and checksum.](figs/pipeline.svg)
 
@@ -59,10 +59,11 @@ and the compile fails with a named error rather than shipping a broken citation.
 Third, it strips links that point at sibling markdown files, keeping their text.
 
 This paragraph continues the same section deliberately: it pushes content across
-the page boundary so the later-page running header is exercised. The research
-specimen asserts the stronger contract: a declared running title appears once on
-each later page, `jiokua.dev` appears in every page's furniture, and only the
-first-page identity line is clickable.
+the page boundary so the running header is exercised across pages. The research
+specimen asserts the stronger contract: a declared running title appears in the
+header of every page, the page folio sits at the right, and `jiokua.dev` anchors
+the footer of every page — none of the furniture is linked, because PDF/UA-1
+forbids links inside footer artifacts.
 
 ## Why the checks exist
 
@@ -78,10 +79,10 @@ standard at compile time — a missing document title or a broken heading hierar
 is a build failure, not a latent defect. Accessibility is a property the pipeline
 constructs, not one it hopes for.
 
-Everything above also pads this document past one page on purpose: running
-furniture only appears from page 2 onward. If you are reading the PDF, the header
-should show the paper title at left and `jiokua.dev` at right in quiet Geist Mono,
-with neither item linked. The bare URL
+Everything above also pads this document past one page on purpose so the running
+frame repeats. If you are reading the PDF, every page's header shows the paper
+title at left and the page number at right in quiet Geist Mono, with `jiokua.dev`
+at the foot; none of that furniture is linked. The bare URL
 https://github.com/joshuaiokua/paperkit should render as a clickable link here and
 in the references below, courtesy of `autolink_bare_uris`.
 

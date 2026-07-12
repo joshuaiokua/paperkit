@@ -45,12 +45,11 @@ verify_manifest "$KIT/fonts"
 "${PY[@]}" "$KIT/check_render.py" "$KIT/sample/sample.pdf" \
   --min-pages 2 --min-links 6 \
   --sentinel "paperkit sample document" \
-  --sentinel-count "paperkit sample document=2" \
+  --sentinel-count "paperkit sample document=4" \
   --sentinel "PAPERKIT SAMPLE PIPELINE" \
   --forbid-text "Joshua Iokua" \
   --require-title "paperkit sample document" \
   --require-author "Joshua Iokua" \
-  --require-uri-once "https://jiokua.dev" \
   --require-font Geist --require-font Literata --require-font DejaVuSans
 
 printf '%s\n' \
@@ -69,7 +68,7 @@ printf '%s\n' \
 
 "${PY[@]}" "$KIT/check_render.py" "${RICH_TITLE_MD%.md}.pdf" \
   --min-pages 2 --min-links 1 \
-  --sentinel-count "Linked title=2" \
+  --sentinel-count "Linked title=3" \
   --require-title "Linked title" \
   --require-author "Joshua Iokua" \
   --require-uri-once "https://example.com" \
@@ -92,7 +91,7 @@ printf '%s\n' \
 "${PY[@]}" "$KIT/check_render.py" "${LONG_TITLE_MD%.md}.pdf" \
   --min-pages 2 \
   --sentinel-count "$LONG_TITLE=1" \
-  --sentinel-count "Research paper=1" \
+  --sentinel-count "Research paper=2" \
   --require-title "$LONG_TITLE" \
   --require-author "Joshua Iokua" \
   --require-font Geist --require-font Literata
@@ -150,7 +149,7 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --sentinel "01 Introduction" \
   --sentinel "Retention under intermittent constraint" \
   --sentinel "References" \
-  --sentinel-count "Retention under intermittent constraint=3" \
+  --sentinel-count "Retention under intermittent constraint=4" \
   --sentinel-count "jiokua.dev=4" \
   --forbid-text "Joshua Iokua" \
   --forbid-text "Bibliography" \
@@ -159,7 +158,6 @@ grep -F '#bibliography(' "$RESEARCH_TYP"
   --require-subject "Teams often increase review frequency when evidence is scarce, assuming that more checkpoints necessarily improve judgment. This paper tests the opposite proposition: a deliberately intermittent review cadence can preserve calibration while reducing coordination cost. Across three simulated research conditions, scheduled evidence reviews retained decision quality and produced fewer reversals than continuous monitoring. The result is not a general case against observation; it is evidence for protecting the moment when observation becomes interpretation." \
   --require-keyword "research operations" \
   --require-keyword "calibration" \
-  --require-uri-once "https://jiokua.dev" \
   --require-alt "Horizontal bar chart showing lower calibration error for weekly and milestone review than continuous monitoring" \
   --require-font Geist --require-font Literata
 
